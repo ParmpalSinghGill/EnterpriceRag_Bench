@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+
+# Data / model caches
+.cache/
+**/huggingface/
+*.bin
+*.pt
+*.safetensors
+indexes/
+**/faiss_index*/
+**/chroma*/
+**/lancedb*/
+
+# Experiment outputs (keep answers small if committed intentionally)
+answer_evaluation/**/results*.json
+experiments/**/outputs/
+*.log
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
