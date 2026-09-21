@@ -1,0 +1,27 @@
+# Postgres + pgvector for EnterpriseRAGBench chunk store
+#
+# Phase 1: store documents + chunks (text only). Embedding column exists but stays NULL.
+# See Docs/chunk_store.md for usage.
+
+services:
+  erag-postgres:
+    image: pgvector/pgvector:pg16
+    container_name: erag-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: erag
+      POSTGRES_PASSWORD: erag
+      POSTGRES_DB: erag
+    volumes:
+      - erag_pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erag -d erag"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  erag_pgdata:

@@ -17,6 +17,10 @@ indexes/
 **/faiss_index*/
 **/chroma*/
 **/lancedb*/
+indexes/**/chunks.jsonl
+indexes/**/docid_map.jsonl
+indexes/**/size_report.json
+
 
 # Experiment outputs (keep answers small if committed intentionally)
 answer_evaluation/**/results*.json

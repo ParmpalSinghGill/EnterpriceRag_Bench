@@ -65,6 +65,21 @@ Use `Data/benchmark_catalog.jsonl` to filter experiments by:
 
 ---
 
+## Ingestion contract
+
+How to load, chunk, and index the 511,962-document corpus so retrieval stays eval-compatible: **[`Docs/ingestion_spec.md`](Docs/ingestion_spec.md)**
+
+Phase-1 chunk store (Docker Postgres + pgvector, **no embeddings yet**): **[`Docs/chunk_store.md`](Docs/chunk_store.md)**
+
+Phase-1 audit (latest): **[`indexes/chunk_v1/audit_report.md`](indexes/chunk_v1/audit_report.md)** / [`audit_report.json`](indexes/chunk_v1/audit_report.json)
+
+```bash
+docker compose up -d
+python -m ingestion.run_chunk --limit 1000 --out indexes/chunk_smoke   # size smoke test
+python -m ingestion.run_chunk --out indexes/chunk_v1                   # full corpus split
+python -m ingestion.audit_ingest --out indexes/chunk_v1/audit_report.json
+```
+
 ## Evaluation contract
 
 Full definition: **[`Docs/evaluation_spec.md`](Docs/evaluation_spec.md)**
@@ -105,15 +120,21 @@ Questions without gold docs (`high_level`, `info_not_found`) skip retrieval/sour
 
 ```text
 EnterpriseRAGBench/
-├── README.md                 # this file
+├── README.md
+├── docker-compose.yml        # Postgres + pgvector (chunk store)
 ├── Docs/
-│   └── evaluation_spec.md    # metrics + scoring contract
+│   ├── evaluation_spec.md
+│   ├── ingestion_spec.md
+│   └── chunk_store.md        # Docker + phase-1 chunking instructions
 ├── Data/
-│   ├── Prepocessing.py       # explore docs / questions
+│   ├── Prepocessing.py
 │   └── benchmark_catalog.jsonl
-├── experiments/              # one folder per technique (add as you go)
+├── infra/postgres/init.sql   # DB schema (embeddings NULL for now)
+├── ingestion/                # sentence_quarter_v1 chunker + CLI
+├── indexes/                  # chunk builds (gitignored)
+├── experiments/
 │   └── _template/
-└── answer_evaluation/        # answers.jsonl + results per run
+└── answer_evaluation/
 ```
 
 Suggested experiment folder pattern:
@@ -174,7 +195,7 @@ questions = load_dataset("onyx-dot-app/EnterpriseRAG-Bench", "questions")["test"
 ## Experiment workflow (stable until end)
 
 1. **Pick a technique** → create `experiments/<name>/`
-2. **Index** the document corpus (declare any subset; full corpus required for comparable runs)
+2. **Ingest / index** the document corpus per [`Docs/ingestion_spec.md`](Docs/ingestion_spec.md) (declare any subset; full corpus required for comparable runs)
 3. **Answer** all 500 questions → `answer_evaluation/<name>/answers.jsonl`
 4. **Score** against the evaluation spec (Overall + retrieval @K + source metrics)
 5. **Slice** results with the catalog (`semantic`, `multi_hop`, `temporal`, `unanswerable`, …)
@@ -196,4 +217,4 @@ This workspace builds on that benchmark; it does not replace the official leader
 
 ## Status
 
-Active experimentation. Methods will change; **`Docs/evaluation_spec.md`** and **`Data/benchmark_catalog.jsonl`** are the durable ground truth for “what good looks like.”
+Active experimentation. Methods will change; **`Docs/ingestion_spec.md`**, **`Docs/evaluation_spec.md`**, and **`Data/benchmark_catalog.jsonl`** are the durable ground truth for “how to index” and “what good looks like.”
