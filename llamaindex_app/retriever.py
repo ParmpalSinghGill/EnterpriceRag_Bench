@@ -27,6 +27,35 @@ DEFAULT_DSN = os.environ.get(
     "ERAG_DATABASE_URL", "postgresql://erag:erag@127.0.0.1:5433/erag"
 )
 
+_SHARED_HYBRID: Optional[HybridRetriever] = None
+_SHARED_EXPANDER: Optional[QueryExpander] = None
+
+
+def get_shared_hybrid_retriever(
+    dsn: str = DEFAULT_DSN,
+    bm25_db_path: Optional[Path] = None,
+    rrf_k: int = 20,
+    weight_dense: float = 1.0,
+    weight_sparse: float = 1.2,
+) -> HybridRetriever:
+    global _SHARED_HYBRID
+    if _SHARED_HYBRID is None:
+        _SHARED_HYBRID = HybridRetriever(
+            dsn=dsn,
+            bm25_db_path=bm25_db_path,
+            rrf_k=rrf_k,
+            weight_dense=weight_dense,
+            weight_sparse=weight_sparse,
+        )
+    return _SHARED_HYBRID
+
+
+def get_shared_query_expander() -> QueryExpander:
+    global _SHARED_EXPANDER
+    if _SHARED_EXPANDER is None:
+        _SHARED_EXPANDER = QueryExpander()
+    return _SHARED_EXPANDER
+
 
 class EnterpriseHybridRetriever(BaseRetriever):
     """LlamaIndex-compatible hybrid retriever fusing Dense BGE-M3 and Sparse BM25."""
@@ -47,14 +76,14 @@ class EnterpriseHybridRetriever(BaseRetriever):
         self.use_expansion = use_expansion
         self.max_chunks_per_doc = max_chunks_per_doc
         self.dsn = dsn
-        self.hybrid = HybridRetriever(
+        self.hybrid = get_shared_hybrid_retriever(
             dsn=dsn,
             bm25_db_path=bm25_db_path,
             rrf_k=rrf_k,
             weight_dense=weight_dense,
             weight_sparse=weight_sparse,
         )
-        self.expander = QueryExpander() if use_expansion else None
+        self.expander = get_shared_query_expander() if use_expansion else None
 
     def _retrieve(self, query_bundle: QueryBundle) -> List[NodeWithScore]:
         """Execute multi-stream retrieval and convert results to LlamaIndex Nodes."""

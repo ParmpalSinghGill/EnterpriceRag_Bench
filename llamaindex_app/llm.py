@@ -6,6 +6,7 @@ Provides seamless integration with LlamaIndex ResponseSynthesizer and ReActAgent
 from __future__ import annotations
 
 import os
+import re
 from typing import Any, Optional, Sequence
 
 from llama_index.core.llms.custom import CustomLLM
@@ -58,6 +59,30 @@ class NemotronLLM(CustomLLM):
             is_chat_model=True,
         )
 
+    @staticmethod
+    def _clean_reasoning(answer: str) -> str:
+        """Strip raw thinking traces or chain-of-thought preambles from model output."""
+        if "Here's a thinking process" in answer or "Let me analyze" in answer:
+            parts = re.split(r"\n\n(?=[A-Z0-9\"'•\-])", answer)
+            if len(parts) > 1:
+                non_thinking = [
+                    p for p in parts
+                    if not p.strip().startswith((
+                        "Here's a thinking", "Let me analyze", "1. ", "2. ", "3. ", "4. ", "5. ",
+                        "**Analyze", "**Identify", "**Scan", "**Synthesize", "**Draft", "**Conclusion"
+                    ))
+                ]
+                if non_thinking:
+                    answer = "\n\n".join(non_thinking).strip()
+            m_ans = re.findall(
+                r"(?:Answer|Conclusion|Summary|The answer is|Based on the documents):\s*(.+)",
+                answer,
+                re.DOTALL | re.IGNORECASE,
+            )
+            if m_ans:
+                answer = m_ans[-1].strip()
+        return answer.strip()
+
     def complete(self, prompt: str, **kwargs: Any) -> CompletionResponse:
         system = kwargs.get(
             "system_prompt",
@@ -72,7 +97,8 @@ class NemotronLLM(CustomLLM):
             temperature=temp,
             max_tokens=max_tok,
         )
-        return CompletionResponse(text=resp.strip())
+        cleaned = self._clean_reasoning(resp)
+        return CompletionResponse(text=cleaned)
 
     def stream_complete(self, prompt: str, **kwargs: Any) -> CompletionResponseGen:
         resp = self.complete(prompt, **kwargs)
@@ -94,10 +120,11 @@ class NemotronLLM(CustomLLM):
             temperature=self.temperature,
             max_tokens=self.num_output,
         )
+        cleaned = self._clean_reasoning(resp)
         return ChatResponse(
             message=ChatMessage(
                 role=MessageRole.ASSISTANT,
-                content=resp.strip(),
+                content=cleaned.strip(),
             )
         )
 

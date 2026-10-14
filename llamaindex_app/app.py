@@ -94,15 +94,15 @@ def query_endpoint(req: QueryRequest) -> QueryResponse:
 
 
 @app.post("/chat", response_model=ChatResponse)
-def chat_endpoint(req: ChatRequest) -> ChatResponse:
+async def chat_endpoint(req: ChatRequest) -> ChatResponse:
     """Chat with the autonomous ReAct search agent."""
     try:
         agent = get_cached_agent()
-        # In LlamaIndex, chat handles conversational turn
-        reply = agent.chat(req.message)
+        res = await agent.run(user_msg=req.message)
+        reply_text = getattr(res, "response", str(res))
         return ChatResponse(
             message=req.message,
-            reply=str(reply),
+            reply=str(reply_text),
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

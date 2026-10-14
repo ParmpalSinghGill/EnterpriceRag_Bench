@@ -12,10 +12,15 @@ from typing import Optional
 from llama_index.core import get_response_synthesizer
 from llama_index.core.agent import ReActAgent
 from llama_index.core.query_engine import RetrieverQueryEngine
+from llama_index.core.prompts import PromptTemplate
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 
 from llamaindex_app.llm import NemotronLLM
 from llamaindex_app.retriever import EnterpriseHybridRetriever
+
+DEFAULT_QA_PROMPT = PromptTemplate(
+    "Context:\n{context_str}\n\nQuestion: {query_str}\nAnswer: "
+)
 
 
 def get_query_engine(
@@ -30,6 +35,7 @@ def get_query_engine(
     synthesizer = get_response_synthesizer(
         llm=llm,
         response_mode="compact",
+        text_qa_template=DEFAULT_QA_PROMPT,
     )
     return RetrieverQueryEngine(
         retriever=retriever,
