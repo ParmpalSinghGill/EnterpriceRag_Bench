@@ -1,0 +1,71 @@
+{
+  "model": "space-bunny-free",
+  "n_questions": 25,
+  "top_docs_context": 5,
+  "elapsed_sec": 431.2,
+  "mean_correctness": 0.48,
+  "mean_completeness": 0.283,
+  "mean_overall_score": 0.2697,
+  "by_question_type": {
+    "basic": {
+      "n": 7,
+      "correctness": 0.4286,
+      "completeness": 0.2857,
+      "overall_score": 0.2857
+    },
+    "completeness": {
+      "n": 2,
+      "correctness": 0.5,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "conflicting_info": {
+      "n": 2,
+      "correctness": 0.5,
+      "completeness": 0.5,
+      "overall_score": 0.5
+    },
+    "constrained": {
+      "n": 2,
+      "correctness": 1.0,
+      "completeness": 0.3715,
+      "overall_score": 0.3715
+    },
+    "high_level": {
+      "n": 2,
+      "correctness": 0.5,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "info_not_found": {
+      "n": 2,
+      "correctness": 1.0,
+      "completeness": 1.0,
+      "overall_score": 1.0
+    },
+    "intra_document_reasoning": {
+      "n": 2,
+      "correctness": 0.5,
+      "completeness": 0.5,
+      "overall_score": 0.5
+    },
+    "miscellaneous": {
+      "n": 2,
+      "correctness": 0.5,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "project_related": {
+      "n": 2,
+      "correctness": 0.0,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "semantic": {
+      "n": 2,
+      "correctness": 0.0,
+      "completeness": 0.1666,
+      "overall_score": 0.0
+    }
+  }
+}

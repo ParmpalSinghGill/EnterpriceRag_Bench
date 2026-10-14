@@ -1,0 +1,71 @@
+{
+  "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+  "n_questions": 25,
+  "top_docs_context": 5,
+  "elapsed_sec": 4048.2,
+  "mean_correctness": 0.72,
+  "mean_completeness": 0.16,
+  "mean_overall_score": 0.16,
+  "by_question_type": {
+    "basic": {
+      "n": 7,
+      "correctness": 0.7143,
+      "completeness": 0.1429,
+      "overall_score": 0.1429
+    },
+    "completeness": {
+      "n": 2,
+      "correctness": 0.5,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "conflicting_info": {
+      "n": 2,
+      "correctness": 0.5,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "constrained": {
+      "n": 2,
+      "correctness": 1.0,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "high_level": {
+      "n": 2,
+      "correctness": 1.0,
+      "completeness": 0.5,
+      "overall_score": 0.5
+    },
+    "info_not_found": {
+      "n": 2,
+      "correctness": 1.0,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "intra_document_reasoning": {
+      "n": 2,
+      "correctness": 0.5,
+      "completeness": 0.5,
+      "overall_score": 0.5
+    },
+    "miscellaneous": {
+      "n": 2,
+      "correctness": 1.0,
+      "completeness": 0.5,
+      "overall_score": 0.5
+    },
+    "project_related": {
+      "n": 2,
+      "correctness": 0.5,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "semantic": {
+      "n": 2,
+      "correctness": 0.5,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    }
+  }
+}

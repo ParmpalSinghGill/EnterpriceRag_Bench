@@ -4,6 +4,7 @@ Usage (prefer conda env with torch + transformers, e.g. LLM):
   conda run -n LLM python -m ingestion.embed_bge_m3 --build-id chunk_v1
 
 Resumable: only rows with embedding IS NULL are processed.
+Reconnects automatically if Postgres drops the connection mid-run.
 """
 
 from __future__ import annotations
@@ -53,8 +54,16 @@ def resolve_model_path(explicit: str | None) -> str:
 
 
 def connect(dsn: str):
-    conn = psycopg.connect(dsn)
+    conn = psycopg.connect(
+        dsn,
+        keepalives=1,
+        keepalives_idle=30,
+        keepalives_interval=10,
+        keepalives_count=5,
+        autocommit=False,
+    )
     register_vector(conn)
+    conn.execute("SET synchronous_commit = off")
     return conn
 
 
@@ -78,14 +87,12 @@ def embed_batch(tok, model, texts: list[str], device: str, dtype: torch.dtype) -
     )
     enc = {k: v.to(device) for k, v in enc.items()}
     out = model(**enc)
-    # BGE-M3 dense: CLS token + L2 normalize
     emb = out.last_hidden_state[:, 0].float()
     emb = F.normalize(emb, p=2, dim=1)
     return emb.cpu().numpy().astype(np.float32)
 
 
 def choose_batch_size(n_tokens: int, base: int) -> int:
-    """Shrink batch for long sequences to fit ~8GB VRAM."""
     if n_tokens > 4096:
         return 1
     if n_tokens > 2048:
@@ -95,6 +102,34 @@ def choose_batch_size(n_tokens: int, base: int) -> int:
     if n_tokens > 512:
         return max(1, base // 2)
     return base
+
+
+def _alive(conn) -> bool:
+    try:
+        if conn is None or conn.closed:
+            return False
+        conn.execute("SELECT 1")
+        return True
+    except Exception:
+        return False
+
+
+def _reconnect(dsn: str, old=None):
+    if old is not None:
+        try:
+            old.close()
+        except Exception:
+            pass
+    for attempt in range(1, 8):
+        try:
+            conn = connect(dsn)
+            print(f"  reconnected to postgres (attempt {attempt})")
+            return conn
+        except Exception as e:
+            wait = min(60, 2 ** attempt)
+            print(f"  reconnect failed ({e}); sleep {wait}s")
+            time.sleep(wait)
+    raise RuntimeError("could not reconnect to postgres")
 
 
 def run_embed(
@@ -111,8 +146,13 @@ def run_embed(
     tok, model = load_model(model_path, device, dtype)
 
     t0 = time.time()
-    with connect(dsn) as conn:
-        cur = conn.execute(
+    conn = connect(dsn)
+
+    def counts():
+        nonlocal conn
+        if not _alive(conn):
+            conn = _reconnect(dsn, conn)
+        row = conn.execute(
             """
             SELECT COUNT(*) FILTER (WHERE embedding IS NULL),
                    COUNT(*) FILTER (WHERE embedding IS NOT NULL),
@@ -120,136 +160,147 @@ def run_embed(
             FROM chunks WHERE build_id=%s
             """,
             (build_id,),
-        )
-        n_null, n_filled, n_total = cur.fetchone()
-        print(f"build={build_id} total={n_total} filled={n_filled} remaining={n_null}")
-        if n_null == 0:
-            print("nothing to embed")
-        else:
-            target = n_null if limit is None else min(n_null, int(limit))
-            print(f"embedding up to {target} chunks (streamed)…")
+        ).fetchone()
+        return row
 
-            update_sql = """
-                UPDATE chunks SET embedding = %s::vector
-                WHERE build_id=%s AND chunk_id=%s
-            """
-            fetch_sql = """
-                SELECT chunk_id, text, n_tokens
-                FROM chunks
-                WHERE build_id=%s AND embedding IS NULL
-                ORDER BY n_tokens ASC, chunk_id
-                LIMIT %s
-            """
-            WINDOW = 2048
-            n_done = 0
-            while n_done < target:
-                take = min(WINDOW, target - n_done)
+    n_null, n_filled, n_total = counts()
+    print(f"build={build_id} total={n_total} filled={n_filled} remaining={n_null}")
+
+    update_sql = """
+        UPDATE chunks SET embedding = %s::vector
+        WHERE build_id=%s AND chunk_id=%s
+    """
+    fetch_sql = """
+        SELECT chunk_id, text, n_tokens
+        FROM chunks
+        WHERE build_id=%s AND embedding IS NULL
+        ORDER BY n_tokens ASC, chunk_id
+        LIMIT %s
+    """
+
+    if n_null == 0:
+        print("nothing to embed")
+    else:
+        target = n_null if limit is None else min(n_null, int(limit))
+        print(f"embedding up to {target} chunks (streamed, resumable)…")
+        WINDOW = 1024
+        n_done = 0
+        while n_done < target:
+            take = min(WINDOW, target - n_done)
+            try:
+                if not _alive(conn):
+                    conn = _reconnect(dsn, conn)
                 pending = conn.execute(fetch_sql, (build_id, take)).fetchall()
-                if not pending:
-                    break
-                i = 0
-                while i < len(pending):
-                    nt0 = int(pending[i][2] or 0)
-                    bs = choose_batch_size(nt0, batch_size)
-                    batch = pending[i : i + bs]
-                    max_nt = max(int(r[2] or 0) for r in batch)
-                    bs = min(len(batch), choose_batch_size(max_nt, batch_size))
-                    batch = pending[i : i + bs]
-                    ids = [r[0] for r in batch]
-                    texts = [r[1] or "" for r in batch]
+            except psycopg.OperationalError as e:
+                print(f"  fetch lost connection: {e}")
+                conn = _reconnect(dsn, conn)
+                pending = conn.execute(fetch_sql, (build_id, take)).fetchall()
+            if not pending:
+                break
 
+            i = 0
+            while i < len(pending):
+                nt0 = int(pending[i][2] or 0)
+                bs = choose_batch_size(nt0, batch_size)
+                batch = pending[i : i + bs]
+                max_nt = max(int(r[2] or 0) for r in batch)
+                bs = min(len(batch), choose_batch_size(max_nt, batch_size))
+                batch = pending[i : i + bs]
+                ids = [r[0] for r in batch]
+                texts = [r[1] or "" for r in batch]
+
+                try:
+                    embs = embed_batch(tok, model, texts, device, dtype)
+                except torch.cuda.OutOfMemoryError:
+                    torch.cuda.empty_cache()
+                    if len(batch) == 1:
+                        raise
+                    print(f"  OOM at batch={len(batch)} n_tokens≈{max_nt}; retrying singly")
+                    embs_list = [
+                        embed_batch(tok, model, [r[1] or ""], device, dtype)[0]
+                        for r in batch
+                    ]
+                    embs = np.stack(embs_list, axis=0)
+
+                assert embs.shape[1] == DIM, embs.shape
+                rows = [(embs[j].tolist(), build_id, ids[j]) for j in range(len(ids))]
+
+                for attempt in range(1, 6):
                     try:
-                        embs = embed_batch(tok, model, texts, device, dtype)
-                    except torch.cuda.OutOfMemoryError:
-                        torch.cuda.empty_cache()
-                        if len(batch) == 1:
+                        if not _alive(conn):
+                            conn = _reconnect(dsn, conn)
+                        with conn.cursor() as ucur:
+                            ucur.executemany(update_sql, rows)
+                        conn.commit()
+                        break
+                    except psycopg.OperationalError as e:
+                        print(f"  write lost connection (attempt {attempt}): {e}")
+                        try:
+                            conn.rollback()
+                        except Exception:
+                            pass
+                        conn = _reconnect(dsn, conn)
+                        if attempt == 5:
                             raise
-                        print(f"  OOM at batch={len(batch)} n_tokens≈{max_nt}; retrying singly")
-                        embs_list = [
-                            embed_batch(tok, model, [r[1] or ""], device, dtype)[0]
-                            for r in batch
-                        ]
-                        embs = np.stack(embs_list, axis=0)
 
-                    assert embs.shape[1] == DIM, embs.shape
-                    rows = [(embs[j].tolist(), build_id, ids[j]) for j in range(len(ids))]
-                    with conn.cursor() as ucur:
-                        ucur.executemany(update_sql, rows)
-                    conn.commit()
-
-                    n_done += len(batch)
-                    i += len(batch)
-                    if n_done % 500 < len(batch) or n_done >= target:
-                        elapsed = time.time() - t0
-                        rate = n_done / max(elapsed, 1e-6)
-                        eta = (target - n_done) / max(rate, 1e-6)
+                n_done += len(batch)
+                i += len(batch)
+                if n_done % 500 < len(batch) or n_done >= target:
+                    elapsed = time.time() - t0
+                    rate = n_done / max(elapsed, 1e-6)
+                    eta = (target - n_done) / max(rate, 1e-6)
+                    print(
+                        f"  … {n_done}/{target} "
+                        f"({rate:.1f} chunks/s, elapsed {elapsed/60:.1f}m, eta {eta/60:.1f}m) "
+                        f"last_bs={len(batch)} max_tok≈{max_nt}"
+                    )
+                    if device.startswith("cuda"):
                         print(
-                            f"  … {n_done}/{target} "
-                            f"({rate:.1f} chunks/s, elapsed {elapsed/60:.1f}m, eta {eta/60:.1f}m) "
-                            f"last_bs={len(batch)} max_tok≈{max_nt}"
+                            f"     vram_alloc={torch.cuda.memory_allocated()/1e9:.2f}G "
+                            f"peak={torch.cuda.max_memory_allocated()/1e9:.2f}G"
                         )
-                        if device.startswith("cuda"):
-                            print(
-                                f"     vram_alloc={torch.cuda.memory_allocated()/1e9:.2f}G "
-                                f"peak={torch.cuda.max_memory_allocated()/1e9:.2f}G"
-                            )
 
-        # Verify
-        cur = conn.execute(
-            """
-            SELECT COUNT(*) FILTER (WHERE embedding IS NULL),
-                   COUNT(*) FILTER (WHERE embedding IS NOT NULL),
-                   COUNT(*)
-            FROM chunks WHERE build_id=%s
-            """,
-            (build_id,),
-        )
-        n_null, n_filled, n_total = cur.fetchone()
-        print(f"verify: total={n_total} filled={n_filled} null={n_null}")
+    n_null, n_filled, n_total = counts()
+    print(f"verify: total={n_total} filled={n_filled} null={n_null}")
 
-        # Dim check sample
-        sample = conn.execute(
-            """
-            SELECT vector_dims(embedding) FROM chunks
-            WHERE build_id=%s AND embedding IS NOT NULL LIMIT 5
-            """,
-            (build_id,),
-        ).fetchall()
-        dims = [r[0] for r in sample]
-        print(f"sample vector_dims={dims}")
+    sample = conn.execute(
+        """
+        SELECT vector_dims(embedding) FROM chunks
+        WHERE build_id=%s AND embedding IS NOT NULL LIMIT 5
+        """,
+        (build_id,),
+    ).fetchall()
+    dims = [r[0] for r in sample]
+    print(f"sample vector_dims={dims}")
 
-        if create_index and n_null == 0 and n_filled > 0:
-            print("creating HNSW index on chunks.embedding (cosine)…")
-            # Drop if exists from prior run
-            conn.execute(
-                "DROP INDEX IF EXISTS chunks_embedding_hnsw_idx"
-            )
-            t_idx = time.time()
-            conn.execute(
-                """
-                CREATE INDEX chunks_embedding_hnsw_idx
-                ON chunks USING hnsw (embedding vector_cosine_ops)
-                WITH (m = 16, ef_construction = 64)
-                """
-            )
-            conn.commit()
-            print(f"HNSW index created in {time.time()-t_idx:.0f}s")
-
-        # Update ingest_builds notes + manifest
+    if create_index and n_null == 0 and n_filled > 0:
+        print("creating HNSW index on chunks.embedding (cosine)…")
+        conn.execute("DROP INDEX IF EXISTS chunks_embedding_hnsw_idx")
+        t_idx = time.time()
         conn.execute(
             """
-            UPDATE ingest_builds
-            SET notes = %s
-            WHERE build_id=%s
-            """,
-            (
-                f"bge-m3 embeddings filled={n_filled}/{n_total}; dim={DIM}; fp16={fp16}",
-                build_id,
-            ),
+            CREATE INDEX chunks_embedding_hnsw_idx
+            ON chunks USING hnsw (embedding vector_cosine_ops)
+            WITH (m = 16, ef_construction = 64)
+            """
         )
         conn.commit()
+        print(f"HNSW index created in {time.time()-t_idx:.0f}s")
 
-    # Update on-disk manifest
+    conn.execute(
+        """
+        UPDATE ingest_builds
+        SET notes = %s
+        WHERE build_id=%s
+        """,
+        (
+            f"bge-m3 embeddings filled={n_filled}/{n_total}; dim={DIM}; fp16={fp16}",
+            build_id,
+        ),
+    )
+    conn.commit()
+    conn.close()
+
     man_path = ROOT / "indexes" / build_id / "manifest.json"
     if man_path.exists():
         man = json.loads(man_path.read_text())

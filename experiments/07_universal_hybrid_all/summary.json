@@ -1,0 +1,96 @@
+{
+  "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+  "categories": [
+    "basic",
+    "completeness",
+    "conflicting_info",
+    "constrained",
+    "high_level",
+    "info_not_found",
+    "intra_document_reasoning",
+    "miscellaneous",
+    "project_related",
+    "semantic"
+  ],
+  "use_expansion": true,
+  "n_questions": 300,
+  "top_docs_context": 5,
+  "workers": 2,
+  "elapsed_sec": 15629.8,
+  "mean_hit_at_5": 0.7567,
+  "mean_correctness": 0.7733,
+  "mean_completeness": 0.415,
+  "mean_overall_score": 0.3628,
+  "by_question_type": {
+    "basic": {
+      "n": 50,
+      "hit_at_5": 0.74,
+      "correctness": 0.76,
+      "completeness": 0.5507,
+      "overall_score": 0.526
+    },
+    "completeness": {
+      "n": 20,
+      "hit_at_5": 0.8,
+      "correctness": 0.55,
+      "completeness": 0.3724,
+      "overall_score": 0.2034
+    },
+    "conflicting_info": {
+      "n": 20,
+      "hit_at_5": 0.9,
+      "correctness": 0.85,
+      "completeness": 0.0305,
+      "overall_score": 0.0205
+    },
+    "constrained": {
+      "n": 30,
+      "hit_at_5": 0.9667,
+      "correctness": 0.7333,
+      "completeness": 0.2227,
+      "overall_score": 0.1321
+    },
+    "high_level": {
+      "n": 10,
+      "hit_at_5": 0.0,
+      "correctness": 0.7,
+      "completeness": 0.3733,
+      "overall_score": 0.34
+    },
+    "info_not_found": {
+      "n": 20,
+      "hit_at_5": 0.0,
+      "correctness": 0.9,
+      "completeness": 0.3,
+      "overall_score": 0.3
+    },
+    "intra_document_reasoning": {
+      "n": 40,
+      "hit_at_5": 0.975,
+      "correctness": 0.9,
+      "completeness": 0.747,
+      "overall_score": 0.722
+    },
+    "miscellaneous": {
+      "n": 20,
+      "hit_at_5": 0.95,
+      "correctness": 0.8,
+      "completeness": 0.5583,
+      "overall_score": 0.5583
+    },
+    "project_related": {
+      "n": 40,
+      "hit_at_5": 0.95,
+      "correctness": 0.725,
+      "completeness": 0.3055,
+      "overall_score": 0.1976
+    },
+    "semantic": {
+      "n": 50,
+      "hit_at_5": 0.62,
+      "correctness": 0.76,
+      "completeness": 0.3847,
+      "overall_score": 0.3347
+    }
+  }
+}

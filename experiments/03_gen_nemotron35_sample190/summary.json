@@ -1,0 +1,72 @@
+{
+  "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+  "n_questions": 190,
+  "top_docs_context": 5,
+  "workers": 3,
+  "elapsed_sec": 150.5,
+  "mean_correctness": 0.5053,
+  "mean_completeness": 0.0738,
+  "mean_overall_score": 0.0738,
+  "by_question_type": {
+    "basic": {
+      "n": 20,
+      "correctness": 0.45,
+      "completeness": 0.0833,
+      "overall_score": 0.0833
+    },
+    "completeness": {
+      "n": 20,
+      "correctness": 0.45,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "conflicting_info": {
+      "n": 20,
+      "correctness": 0.55,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "constrained": {
+      "n": 20,
+      "correctness": 0.7,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "high_level": {
+      "n": 10,
+      "correctness": 0.7,
+      "completeness": 0.335,
+      "overall_score": 0.335
+    },
+    "info_not_found": {
+      "n": 20,
+      "correctness": 0.85,
+      "completeness": 0.15,
+      "overall_score": 0.15
+    },
+    "intra_document_reasoning": {
+      "n": 20,
+      "correctness": 0.45,
+      "completeness": 0.05,
+      "overall_score": 0.05
+    },
+    "miscellaneous": {
+      "n": 20,
+      "correctness": 0.3,
+      "completeness": 0.15,
+      "overall_score": 0.15
+    },
+    "project_related": {
+      "n": 20,
+      "correctness": 0.4,
+      "completeness": 0.0,
+      "overall_score": 0.0
+    },
+    "semantic": {
+      "n": 20,
+      "correctness": 0.3,
+      "completeness": 0.1,
+      "overall_score": 0.1
+    }
+  }
+}

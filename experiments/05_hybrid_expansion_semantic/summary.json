@@ -1,0 +1,24 @@
+{
+  "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+  "categories": [
+    "semantic"
+  ],
+  "use_expansion": true,
+  "n_questions": 20,
+  "top_docs_context": 5,
+  "workers": 3,
+  "elapsed_sec": 1128.0,
+  "mean_hit_at_5": 0.3,
+  "mean_correctness": 0.7,
+  "mean_completeness": 0.01,
+  "mean_overall_score": 0.01,
+  "by_question_type": {
+    "semantic": {
+      "n": 20,
+      "hit_at_5": 0.3,
+      "correctness": 0.7,
+      "completeness": 0.01,
+      "overall_score": 0.01
+    }
+  }
+}
