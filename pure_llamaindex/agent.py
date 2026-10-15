@@ -37,3 +37,4 @@ def get_react_agent(similarity_top_k: int = 7) -> ReActAgent:
         llm=Settings.llm,
         verbose=True,
     )
+

@@ -43,3 +43,4 @@ def get_vector_index(
 
     _INDEX_CACHE = VectorStoreIndex.from_vector_store(vector_store)
     return _INDEX_CACHE
+

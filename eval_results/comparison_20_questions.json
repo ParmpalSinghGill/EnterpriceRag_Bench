@@ -1,0 +1,813 @@
+{
+  "summary": {
+    "total_questions": 20,
+    "hybrid_qe_acc": 75.0,
+    "pure_qe_acc": 85.0,
+    "hybrid_qe_avg_latency": 38.6825,
+    "pure_qe_avg_latency": 90.53500000000001
+  },
+  "by_category": {
+    "basic": {
+      "hybrid_qe": {
+        "correct": 1,
+        "total": 2
+      },
+      "pure_qe": {
+        "correct": 1,
+        "total": 2
+      },
+      "pure_agent": {
+        "correct": 1,
+        "total": 2
+      }
+    },
+    "completeness": {
+      "hybrid_qe": {
+        "correct": 0,
+        "total": 2
+      },
+      "pure_qe": {
+        "correct": 1,
+        "total": 2
+      },
+      "pure_agent": {
+        "correct": 1,
+        "total": 2
+      }
+    },
+    "conflicting_info": {
+      "hybrid_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_agent": {
+        "correct": 2,
+        "total": 2
+      }
+    },
+    "constrained": {
+      "hybrid_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_agent": {
+        "correct": 2,
+        "total": 2
+      }
+    },
+    "high_level": {
+      "hybrid_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_agent": {
+        "correct": 2,
+        "total": 2
+      }
+    },
+    "info_not_found": {
+      "hybrid_qe": {
+        "correct": 1,
+        "total": 2
+      },
+      "pure_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_agent": {
+        "correct": 1,
+        "total": 2
+      }
+    },
+    "intra_document_reasoning": {
+      "hybrid_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_agent": {
+        "correct": 1,
+        "total": 2
+      }
+    },
+    "miscellaneous": {
+      "hybrid_qe": {
+        "correct": 1,
+        "total": 2
+      },
+      "pure_qe": {
+        "correct": 1,
+        "total": 2
+      },
+      "pure_agent": {
+        "correct": 2,
+        "total": 2
+      }
+    },
+    "project_related": {
+      "hybrid_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_agent": {
+        "correct": 2,
+        "total": 2
+      }
+    },
+    "semantic": {
+      "hybrid_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_qe": {
+        "correct": 2,
+        "total": 2
+      },
+      "pure_agent": {
+        "correct": 0,
+        "total": 2
+      }
+    }
+  },
+  "records": [
+    {
+      "question_id": "qst_0001",
+      "category": "basic",
+      "question": "What are the default size limits for file uploads and total request size for the new multipart upload support on the OpenAI-compatible API endpoints?",
+      "gold_answer": "The default limits are 10 MiB per file (max_file_size) and 50 MiB total per request (max_total_request_size) for multipart uploads on the OpenAI-compatible endpoints.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Here's a thinking process:\n\n1.  **Analyze User Input:**\n   - User is asking for default size limits for file uploads and total request size for the new multipart upload support on OpenAI-compatible API endpoints.\n   - I need to extract this information from the provided context (multiple GitHub PR descriptions, review comments, release notes, etc.).\n\n2.  **Identify Relevant Information in Context:**\n   Let me scan through the docs to find mentions of default size limits for multipart uploads, especially related to OpenAI-compat.\n\n   - **dsid_c0e4ca5e29da45858056f1da8eb45009**: \n     - Mentions: \"PART_MAX_BYTES and MULTIPART_TOTAL_MAX_BYTES with sane defaults (10MB per part, 50MB total)\"\n     - Also: \"configurable via env so infra can match historic behavior.\"\n     - Release notes: \"multipart uploads now enforce per-part and total payload limits and validate content-type; clients that upload larger files should set PART_MAX_BYTES or switch to external storage and pass URLs.\"\n\n   - **dsid_1473858d383d48c1890e27312f065388**: \n     - Mentions: \"Introduce Content-Length and chunked streaming guards. For chunked uploads we now apply per-chunk size ceiling and an aggregate max (default 25MB) and return 413 FILE_TOO_LARGE when exceeded. Limit is configurable via service config and Dedicated/Private can override per-tenant.\"\n     - Also: \"Default file-size cap is conservative (25MB)\"\n\n   - **dsid_ae068ee4aa9640159427cd941bef0238**: \n     - Mentions: \"Enforce configurable limits: max_file_size (default 10MiB), max_total_request_size (default 50MiB), max_parts_count (default 20).\"\n     - Also: \"These defaults are conservative and documented; they can be overridden at tenant or route level via API config.\"\n\n   - **dsid_2352022a7d114fbfae60b47bd7c1c776**: \n     - Focuses on backpressure, quotas, content-type whitelist, structured-output size cap. Mentions \"Default quotas are conservative and configurable.\" But doesn't give specific MB numbers in the excerpt.\n\n   - **dsid_87aa38c293314e25ba799ec3f082100f**: \n     - Mentions: \"default per_part is 5MB and aggregate 50MB for hosted; documented and configurable via runtime_defaults.yaml. Enterprise customers can set stricter values.\"\n     - Also: \"per-part quota conservative for hosted API customers\"\n\n   - **dsid_ea298d9a235949febd7c03cb500817c4**: \n     - Mentions per-tool max_upload_bytes and max_chunks, but not explicit defaults in the excerpt.\n\n   - **dsid_c6c8e872d0a3417d9acaa79aaa0771db**: \n     - Mentions \"configurable via service-level flags and per-customer overrides\" but no specific defaults in excerpt.\n\n3.  **Synthesize Default Limits:**\n   There are multiple defaults mentioned across different PRs, which might reflect different versions or config paths. I need to identify the most relevant \"new multipart upload support on the OpenAI-compatible API endpoints\" as per the question.\n\n   Let's list the explicit defaults I see:\n   - 10MB per part, 50MB total (dsid_c0e4ca5e29da45858056f1da8eb45009) - PART_MAX_BYTES and MULTIPART_TOTAL_MAX_BYTES\n   - 25MB default file-size cap (dsid_1473858d383d48c1890e27312f065388) - aggregate max for chunked uploads\n   - 10MiB per file, 50MiB per request (dsid_ae068ee4aa9640159427cd941bef0238) - max_file_size and max_total_request_size\n   - 5MB per part, 50MB aggregate for hosted (dsid_87aa38c293314e25ba799ec3f082100f) - per-part and per-request quotas\n\n   There's inconsistency. I need to determine which one is the \"new multipart upload support on the OpenAI-compatible API endpoints\" as asked. The question likely refers to a specific consolidated or recent implementation. Perhaps the most recent or the one that's most specifically about OpenAI-compat multipart.\n\n   Looking at the descriptions, several PRs are about multipart validation for OpenAI-compat. The user asks: \"What are the default size limits for file uploads and total request size for the new multipart upload support on the OpenAI-compatible API endpoints?\"\n\n   I should provide the defaults that are most consistently mentioned or perhaps note the range/configurability. But the question expects specific defaults.\n\n   Let's see if there's a unifying theme. Many mention 10MB per part / 50MB total, or 25MB aggregate, or 10MiB/50MiB. The PR dsid_ae068ee4aa9640159427cd941bef0238 says: \"max_file_size (default 10MiB), max_total_request_size (default 50MiB)\". dsid_c0e4ca5e29da45858056f1da8eb45009 says: \"PART_MAX_BYTES and MULTIPART_TOTAL_MAX_BYTES with sane defaults (10MB per part, 50MB total)\". dsid_87aa38c293314e25ba799ec3f082100f says: \"default per_part is 5MB and aggregate 50MB for hosted\".\n\n   Perhaps the most specific to \"OpenAI-compatible API endpoints\" is dsid_ae068ee4aa9640159427cd941bef0238 which explicitly mentions \"OpenAI-compatibility path\", \"multipart/form-data handling, strict content-type validation, and payload limit enforcement for API tool/file inputs\". Its defaults: 10MiB per file, 50MiB per request.\n\n   dsid_c0e4ca5e29da45858056f1da8eb45009 also is about OpenAI-compat layer: \"customers using the OpenAI-compatibility layer and the tool/function-calling endpoints were able to upload large multipart payloads...\"\n\n   dsid_1473858d383d48c1890e27312f065388 is about \"OpenAI-compat tool/file endpoints\".\n\n   Given the question phrasing \"new multipart upload support on the OpenAI-compatible API endpoints\", I think the answer should reference the defaults from the most relevant PRs, maybe consolidating or stating the most commonly cited ones, and note configurability.\n\n   However, the user might expect a concise answer with specific numbers. I should probably give the defaults from the primary PRs, perhaps highlighting that they are configurable, and mention the most explicit ones.\n\n   Let's read the release notes from dsid_c0e4ca5e29da45858056f1da8eb45009: \"multipart uploads now enforce per-part and total payload limits and validate content-type; clients that upload larger files should set PART_MAX_BYTES or switch to external storage and pass URLs.\" Defaults: 10MB per part, 50MB total.\n\n   From dsid_ae068ee4aa9640159427cd941bef0238: \"Default limits: 10MiB per file, 50MiB per request.\"\n\n   From dsid_1473858d383d48c1890e27312f065388: \"Default file-size cap is conservative (25MB)\"\n\n   From dsid_87aa38c293314e25ba799ec3f082100f: \"default per_part is 5MB and aggregate 50MB for hosted\"\n\n   There's variation. I need to decide how to answer. Perhaps the question is based on a specific context or the most recent/consolidated version. Since I'm an assistant, I should synthesize what's in the context, maybe list the defaults mentioned, and emphasize configurability.\n\n   But the user says: \"Question: What are the default size limits for file uploads and total request size for the new multipart upload support on the OpenAI-compatible API endpoints?\" This looks like a direct question expecting an answer based on the provided context. I should answer using the context.\n\n   I'll structure the answer by citing the defaults from the relevant PRs, noting that they are configurable, and perhaps giving the most frequently mentioned pair: 10MB per part / 50MB total, or 10MiB per file / 50MiB per request.\n\n   Let's see if there's a definitive one. Looking at the review comments and resolution, maybe there's a consensus. dsid_c0e4ca5e29da45858056f1da8eb45009 has Aaron Lee asking to make PART_MAX_BYTES default to 8MB, Priya Kaur keeping 10MB. That PR finalizes at 10MB per part, 50MB total.\n\n   dsid_ae068ee4aa9640159427cd941bef0238 has Liam Chen asking about application/pdf, Aisha Patel agreeing, adding application/pdf to tenant_whitelist, but the size limits are 10MiB per file, 50MiB per request.\n\n   dsid_1473858d383d48c1890e27312f065388 has default 25MB.\n\n   dsid_87aa38c293314e25ba799ec3f082100f has 5MB per part, 50MB aggregate for hosted.\n\n   Given the question is about \"the new multipart upload support on the OpenAI-compatible API endpoints\", and multiple PRs contribute to this, I think the safest answer is to provide the defaults that are most specifically tied to OpenAI-compat multipart, and note the configurability.\n\n   Perhaps I should output: \"The default size limits vary by configuration, but commonly cited defaults include: 10 MB per part and 50 MB total request size (e.g., PART_MAX_BYTES=10MB, MULTIPART_TOTAL_MAX_BYTES=50MB); or 10 MiB per file and 50 MiB per request (max_file_size=10MiB, max_total_request_size=50MiB); with some implementations defaulting to 25 MB aggregate or 5 MB per part for hosted customers. All are configurable via environment variables or service configuration (e.g., PART_MAX_BYTES, MULTIPART_TOTAL_MAX_BYTES, max_file_size, max_total_request_size).\"\n\n   But the user might want a concise answer. Let's see the exact phrasing: \"What are the default size limits for file uploads and total request size for the new multipart upload support on the OpenAI-compatible API endpoints?\" It might be from a specific doc or test. I'll answer based on the context, maybe highlighting the most explicit one.\n\n   I'll check dsid_c0e4ca5e29da45858056f1da8eb45009's description: \"Motivation: customers using the OpenAI-compatibility layer and the tool/function-calling endpoints were able to upload large multipart payloads and malformed parts which caused OOMs and destabilized streaming. This PR centralizes multipart validation into the API gateway handler and adds explicit per-part and total payload limits, content-type sniffing, and dual-field support for OpenAI-compat clients (accept both 'file' and 'files' form fields). The change is intentionally conservative: we validate before handing off to the streaming runtime so we can guarantee early rejection and deterministic error responses instead of mid-stream failures. Implementation highlights: 1) api/handlers/multipart_handler.py implements a two-pass scan: fast header-only pass to enforce per-part size and type heuristics, followed by a streaming handoff that preserves the original stream for allowed parts. 2) Introduced config flags (env) for PART_MAX_BYTES and MULTIPART_TOTAL_MAX_BYTES with sane defaults (10MB per part, 50MB total) and runtime metrics emitted for rejected uploads.\"\n\n   This is very explicit: 10MB per part, 50MB total. And it's specifically about OpenAI-compatibility layer.\n\n   dsid_ae068ee4aa9640159427cd941bef0238: \"Summary of changes: 1) Add a streaming-safe multipart parser that yields parts rather than buffering entire",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 47.72
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "The default size limits for the OpenAI-compatible API endpoints' multipart upload support are 10 MiB per file and 50 MiB per total request size, both configurable via service configuration.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer correctly states the default 10 MiB per file and 50 MiB total request size limits, fully consistent with the Gold Answer. The additional note about configurability does not contradict the Gold Answer. Both Gold Facts are directly supported by the candidate's statements.",
+        "latency_sec": 57.68
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "For the OpenAI-compatible API endpoints with multipart upload support, the default size limits are typically:\n\n- **Per-file upload size**: 10 to 25 MB (configurable per tenant/service)\n- **Total aggregate request size**: 50 MB (configurable per tenant/service)\n\nThese limits can be adjusted via service configuration to meet specific requirements. The exact defaults may vary depending on your specific deployment and configuration.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "",
+        "latency_sec": 51.44
+      }
+    },
+    {
+      "question_id": "qst_0002",
+      "category": "basic",
+      "question": "What is the name of the new metric added so SRE can track when server-side streaming sessions get finalized due to hitting the time limit?",
+      "gold_answer": "The new metric is `stream.timebox_finalized` (with labels for route and model).",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "logical active sessions",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "The candidate answer 'logical active sessions' does not match the gold answer 'stream.timebox_finalized' and does not state or imply any of the provided gold facts regarding the metric name and its labels for route and model.",
+        "latency_sec": 25.43
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "stream stall duration",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "The candidate answer 'stream stall duration' directly conflicts with the gold answer metric name 'stream.timebox_finalized' and does not state or imply the correct metric name or its labels.",
+        "latency_sec": 206.65
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "According to internal engineering documents, SRE has not finalized a server-side streaming sessions time limit metric. Related SLOs and metrics such as stream stall duration and leaked sessions are still in progress, so no specific metric name is available yet.",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "The candidate answer directly contradicts the gold answer by stating no specific metric name is available, while the gold answer identifies `stream.timebox_finalized` as the metric with labels for route and model.",
+        "latency_sec": 97.09
+      }
+    },
+    {
+      "question_id": "qst_0431",
+      "category": "completeness",
+      "question": "What is the procedure for an emergency rollback of a Serving Runtime release (Hosted and Dedicated)?",
+      "gold_answer": "For an emergency rollback of a Serving Runtime release in Hosted and Dedicated, first pause/freeze any in-flight progressive rollout so it cannot auto-advance, then re-pin the runtime to a known-good prior runtime release tag, trigger a redeploy, and verify fleet health (e.g., 5xx rate, p95 TTFT, GPU OOMs) before closing the incident/change record. For Hosted, apply the rollback across regions in order (non-critical/canary first, then remaining canary, then all affected regions) and lock the tag to prevent re-advance; for Dedicated, identify impacted tenant clusters, pin and redeploy per cluster (coordinating customer comms as required), and keep the incident open until metrics are stable (\u224830 minutes Hosted, \u224860 minutes Dedicated) while capturing CI/CD job links, affected regions/clusters, tags, timings, and verification evidence.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Empty Response",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "Candidate answer is empty; no claims made; does not provide the emergency rollback procedure, so it is not correct.",
+        "latency_sec": 2.5
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "**Emergency Rollback Procedure, Hosted and Dedicated**\n\n**When to initiate a rollback**  \n- p95 time-to-first regression exceeds 30% across two or more regions for over 30 minutes.  \n- Error rate on generation routes rises exceeds 2% (driven by 5xx responses, timeouts, or OOM).  \n- Canary cohort shows sustained degradation and traffic cannot be cleanly shifted.  \n- Repe OOM or kernel crash loops repeat with the new runtime build.  \nIn these cases, declare an incident, page Runtime and SRE, and begin preparing rollback steps in parallel.\n\n**Pre-rollback preparation**  \n- the release engineer or infra oncall to confirm the candidate rollback target (the prior runtime release tag).  \n- Capture in the incident channel: current runtime release identifier, intended rollback target, blast radius (regions/tenants), primary symptom (TTFT, 5xx, OOM), and confirmation the prior release was stable (at least 24 hours in production).\n\n**Step-by-step rollback procedure**\n\n1. **Freeze the rollout**  \n   If a rollout is in progress, stop it immediately. Do not continue canary expansion; automated progressive delivery jobs will not re-advance the rollout.\n\n2. **Hosted fleet rollback (global fleets)**  \n   - Use the CI/CD rollback documentation to pin the Hosted runtime to the rollback target tag.  \n   - Roll back in this order:  \n     * Non-cany region(s) still on canary only.  \n     * Remaining canary cohort.  \n     * All regions currently on the bad release.  \n   - After each region, verify:  \n     * 5xx rate normalizes.  \n     * Utilization returns to expected levels.  \n     * TTFT and tokens per second recover to baseline.  \n   - Monitor via verification queries (e.g., \u201cHosted Inference / Runtime Release Health\u201d); track request_error_rate, p95_ms, tokens_per_second, gpu_oom_count.\n\n3. **Dedicated/tenant cluster rollback**  \n   - Identify clusters/tenants currently on the bad release via the \u201cDedicated / Runtime Release Adoption\u201d view.  \n   - Roll back per cluster using the pipeline rollback procedure.  \n   - For clusters with special communication requirements (regulated or premium SLA), coordinate with CS for outbound comms and approvals per the emergency change policy.\n\n4. **Post-rollback validation**  \n   - Keep the incident open until metrics are stable: 30 minutes for Hosted, 60 minutes for Dedicated.  \n   - Request latency distributions should return to baseline; no new error modes should appear.  \n   - Fleet scaling should stabilize; watch for over-provisioning due to the regression.\n\n**Common failure modes and guards**  \n- If the rollback target also shows elevated OOMs, stop and reassess; this may reflect traffic patterns or model mix rather than a runtime issue.  \n- If only one model family shows degradation, consider temporarily routing to a compatible variant instead of a full fleet rollback (requires IC approval).  \n- Avoid rapid flip-flopping between releases; if a forward re-roll becomes necessary, document the reason and require runtime lead approval.\n\n**Artifacts to capture for later review (in the incident/change record)**  \n- CI/CD job link(s) for the rollback.  \n- Affected regions and clusters.  \n- Old runtime release tag and new rollback target tag.  \n- Start and end times.  \n- Verification results (metrics screenshots or permalinks).  \n- Any customer communications sent.",
+        "correct": true,
+        "completeness": 0.9167,
+        "overall_score": 0.9167,
+        "reasoning": "",
+        "latency_sec": 72.0
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "**Emergency Rollback Procedure for Serving Runtime (Hosted + Dedicated):**\n\n**When to Rollback**  \nProceed when one or more of the following is true and mitigation isn\u2019t achievable within ~30 minutes: p95 time-to-first-token regression >30% in 2+ regions for 10+ minutes; error rate >2% on generation routes due to runtime (5xx, timeouts, OOM); canary cohort shows sustained degradation and traffic shift cannot be halted cleanly; repeated GPU OOM or kernel crash loops attributable to the new runtime build. If uncertain, declare an incident and page Runtime + SRE, and prepare rollback steps in parallel.\n\n**Preconditions**  \nAn incident must be declared if customer impact is confirmed or likely. The runtime oncall must have identified a candidate rollback target (a prior runtime release tag). The release or infra oncall must be available to execute the pipeline rollback.\n\n**Ownership & Roles**  \nThe Incident Commander owns the decision to rollback and the communications cadence. The Runtime oncall validates the technical root-cause hypothesis and the rollback target. The Release/Infra oncall executes the rollback in deployment tooling. SRE monitors fleet-level SLOs and regional health signals.\n\n**Decision Checklist** (capture in the incident channel before executing)  \n- Current runtime release identifier (e.g., runtime-release-2025.02.01)  \n- Intended rollback target (e.g., runtime-release-2025.01.17)  \n- Blast radius (Hosted regions; Dedicated clusters/tenants)  \n- Primary symptom (TTFT, throughput, 5xx, OOM)  \n- Confirmation that the prior release is known-good (at least 24 hours stable in prod)\n\n**Step-by-Step Procedure**\n\n1) **Freeze rollout / stop further progression**  \n   If a rollout is in progress, pause it immediately. Ensure no automated progressive delivery job will re-advance the rollout.\n\n2) **Hosted rollback (global fleets)**  \n   Follow the CI/CD rollback procedure to pin the Hosted runtime to the rollback target. Roll back in this order:  \n   - Non-critical region (if any still on canary only)  \n   - Remaining canary cohort  \n   - All regions currently on the bad release  \n   After each region completes, verify:  \n   - 5xx rate normalizes  \n   - GPU utilization returns to expected levels  \n   - TTFT and token/s recover to baseline  \n   Use Console dashboards: \u201cHosted Inference / Runtime Release Health\u201d; monitor metrics: request_error_rate, ttft_p95_ms, tokens_per_sec, gpu_oom_count.\n\n3) **Dedicated rollback (tenant clusters)**  \n   Identify impacted Dedicated clusters/tenants via the \u201cDedicated / Runtime Release Adoption\u201d dashboard. Confirm whether each tenant is on the bad release. Execute rollback per cluster using the pipeline rollback procedure. For high-sensitivity tenants with regulated or premium SLA requirements, coordinate with Customer Success for outbound communications and approvals under the emergency change policy.\n\n4) **Post-rollback validation**  \n   Keep the incident open until metrics are stable for 30 minutes (Hosted) or 60 minutes (Dedicated). Confirm request latency distributions return to baseline and no new error modes appear. Ensure autoscaling stabilizes (watch for over-provisioning due to the regression).\n\n**Guardrails & Common Failure Modes**  \n- If the rollback target also shows elevated OOMs, stop and reassess (may reflect traffic patterns or model mix).  \n- If only one model family is impacted, consider temporarily routing to a compatible variant instead of fleet rollback (requires IC approval).  \n- Avoid rapid flip-flopping between releases; if re-rolling forward is necessary, document the reason and require runtime lead approval.\n\n**Required Artifacts for Later Review**  \nCapture links in the incident channel: CI/CD job link(s) for the rollback, affected regions/clusters, metrics screenshots or dashboard permalinks, any customer communications sent.",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 84.61
+      }
+    },
+    {
+      "question_id": "qst_0432",
+      "category": "completeness",
+      "question": "Which intake channel has the most reports of \"token accounting discrepancy\"?",
+      "gold_answer": "Jira (customer-support SUP tickets) has the most \"token accounting discrepancy\" reports among the provided cases.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "I need to look at the provided documents to find information about token accounting discrepancy reports and which intake channels they come from.\n\nFirst, let me identify all the documents that mention \"token accounting discrepancy\":\n\n6. dsid_2ee23e2b65ab45268b83606f86d8d817 (gmail) - \"Mismatch: AWS Marketplace invoice vs metering report (EU VAT & credits)\" - This is about AWS marketplace invoice discrepancy, not specifically token accounting discrepancy\n\nNow, let me focus on the confluence document (dsid_91abfa2001d747b3b570e8abce00ef4d) which has the specific reporting note about which intake channel has the most reports.\n\nThe document states:\n- Approved intake channels: Jira, Slack, Gmail\n- How to avoid double counting: If a report arrives in Slack or Gmail, file a SUP ticket and link it. Mark the SUP ticket label `token-accounting` and add the origin channel in the description (Slack/Gmail). In weekly reporting, count the case by *origin* (Slack vs Gmail vs Jira), not by total artifacts.\n- Reporting note: \"When answering: 'Which intake channel has the most reports of token accounting discrepancy?' be sure to include Slack and Gmail-origin cases even if a SUP ticket was created later.\"\n\nThis suggests that the system tracks the origin channel (where the report first arrived) and that for the reporting question, we need to include Slack and Gmail-origin cases even if a SUP ticket was created later.\n\nNow, let me look at the other documents to see if there's data about which channels have the most reports.\n\nFrom the Jira ticket (dsid_c4afa7bd5d104c43b45567c799121342), it's about a specific customer issue, not about overall report counts.\n\nFrom the Slack document (dsid_34f267b98745435b8d95e883b29ded9d), there's a conversation about a customer reporting a token accounting discrepancy via Intercom (which would likely map to a SUP ticket or Gmail/Slack depending on how it's handled).\n\nFrom the Gmail document (dsid_2ee23e2b6b5ab45268b83606f86d8d817), it's about AWS marketplace invoice vs metering report, not specifically token accounting discrepancy.\n\nThe confluence playbook (dsid_493c44cc9dd5459a8e10587a888efbef) discusses billing and quota discrepancies generally, but doesn't give specific counts by intake channel.\n\nLet me re-read the confluence document about token accounting discrepancy more carefully:\n\nThe document defines:\n- Approved intake channels: Jira, Slack, Gmail\n- How to avoid double counting: If a report arrives in Slack or Gmail, file a SUP ticket and link it. Mark the SUP ticket label `token-accounting` and add the origin channel in the description (Slack/Gmail). In weekly reporting, count the case by *origin* (Slack vs Gmail vs Jira), not by total artifacts.\n\nAnd the reporting note specifically says: \"When answering: 'Which intake channel has the most reports of token accounting discrepancy?' be sure to include Slack and Gmail-origin cases even if a SUP ticket was created later.\"\n\nThis suggests that the system tracks the origin channel, and for the reporting question, we need to consider all channels (Slack, Gmail, Jira).\n\nBut the question is: which channel has the MOST reports?\n\nWithout specific data counts, I need to infer from the documents what might be the case.\n\nLooking at the documents:\n\nWithout actual count data, I need to think about what the question is asking. It seems like this might be a question that expects an answer based on the provided documents, possibly from the confluence document's reporting note.\n\nThe reporting note says: \"When answering: 'Which intake channel has the most reports of token accounting discrepancy?' be sure to include Slack and Gmail-origin cases even if a SUP ticket was created later.\"\n\nThis implies that there might be a known answer, but the documents don't provide actual counts. However, the document does list the approved intake channels as:\n- Jira (customer-support): SUP-* ticket created directly by Support\n- Slack: #support threads (often started from Intercom/Zendesk summaries)\n- Gmail: finance/billing or CSM forwards to leadership/finance\n\nAnd the reporting note specifically says to include Slack and Gmail-origin cases.\n\nPerhaps the answer is that we need to count all three channels, but the document doesn't specify which has the most. However, the question asks \"Which intake channel has the most reports of 'token accounting discrepancy'?\"\n\nLet me check if there's any other clue.\n\nLooking at the Slack document again: Aisha Rahman says \"Seeing a customer report come in via Intercom: 'token accounting discrepancy' on chat streaming.\" Intercom would typically be integrated with either Slack or Jira, depending on the setup.\n\nThe incident-bot says: \"If customer impact is ongoing, file a SUP ticket and link the thread.\" This suggests that Slack reports get converted to SUP tickets.\n\nThe confluence document says: \"If a report arrives in Slack or Gmail, file a SUP ticket and link it. Mark the SUP ticket label `token-accounting` and add the origin channel in the description (Slack/Gmail).\"\n\nSo the system tracks the origin channel even after a SUP ticket is created.\n\nGiven the documents, I don't see specific counts to determine which channel has the most. But the question might be expecting an answer based on the structure of the documents or the reporting note.\n\nWait, let me re-read the question: \"Which intake channel has the most reports of 'token accounting discrepancy'?\"\n\nAnd the answer format should be just the channel name.\n\nLooking at the confluence document's reporting note again: \"When answering: 'Which intake channel has the most reports of token accounting discrepancy?' be sure to include Slack and Gmail-origin cases even if a SUP ticket was created later.\"\n\nThis suggests that the answer should consider all three channels (Slack, Gmail, Jira), but the question asks which one has the most.\n\nPerhaps I need to look for any mention of counts in the documents.\n\nLet me search for any numbers or counts related to token accounting discrepancy reports.\n\nIn the confluence document, there are \"Known examples\" listed:\n- SUP-2841: streaming retry/reconnect behavior leading to perceived token accounting discrepancy\n- SUP-2917: embeddings tokenizer mismatch leading to perceived token accounting discrepancy\n- SUP-3009: cache-hit + tool calling bug leading to real token accounting discrepancy\n\nThese are SUP ticket numbers, but I don't know how many total reports there are or which channels they came from.\n\nIn the Jira document, there's one specific case.\n\nIn the Slack document, there's one conversation.\n\nWithout actual count data, I'm not sure how to determine which channel has the most.\n\nWait, perhaps the question is from a system that tracks this, and the answer is expected to be derived from the documents' structure or the reporting note.\n\nThe reporting note says: \"be sure to include Slack and Gmail-origin cases even if a SUP ticket was created later.\" This implies that Slack and Gmail might have reports that are also tracked via SUP tickets, and when answering, we need to include those origin cases.\n\nBut it doesn't say which has the most.\n\nLet me think differently. Maybe the question is testing whether I understand that we need to count all channels, but the \"most\" might be Slack based on the documents showing more Slack activity about token accounting discrepancy.\n\nFrom the documents:\n- The confluence document about token accounting discrepancy has a reporting note about Slack and Gmail\n- The Slack document has a conversation about a token accounting discrepancy\n- The Jira document has one ticket\n- The Gmail document is about a different discrepancy\n\nPerhaps Slack has the most based on the frequency of mentions.\n\nBut I'm not confident.\n\nLet me re-read the question and the documents more carefully.\n\nThe question is: \"Which intake channel has the most reports of 'token accounting discrepancy'?\"\n\nAnd the answer should be one of: Slack, Gmail, Jira, or perhaps a combination.\n\nGiven the documents, and the reporting note in the confluence document, I think the answer might be Slack, because:\n\nBut I'm not sure.\n\nWait, let me look at the confluence document again. It says:\n\n\"## Approved intake channels\nWe track where the report first arrived, because it affects response time and deduplication.\n- Jira (customer-support): SUP-* ticket created directly by Support\n- Slack: #support threads (often started from Intercom/Zendesk summaries)\n- Gmail: finance/billing or CSM forwards to leadership/finance\"\n\nAnd the reporting note: \"When answering: 'Which intake channel has the most reports of token accounting discrepancy?' be sure to include Slack and Gmail-origin cases even if a SUP ticket was created later.\"\n\nThis suggests that the system tracks the origin channel, and for the reporting question, we need to consider all three.\n\nBut without data, I can't determine which has the most.\n\nPerhaps the answer is \"Slack\" because the documents show more activity on Slack regarding token accounting discrepancy.\n\nLet me count the mentions:\n\nSo Slack has at least one explicit mention, Jira has one, and the confluence doc discusses both Slack and Gmail.\n\nBut I think the question might be from a specific system or dataset, and the answer might be derivable from the documents.\n\nAnother thought: the confluence document has a section \"## Known examples (for reference)\" with SUP ticket numbers, but those are just examples, not counts.\n\nPerhaps the answer is \"Slack\" because the reporting note specifically says to include Slack and Gmail-origin cases, implying that Slack might have a significant number of reports.\n\nBut I'm really not sure.\n\nLet me think about the context. The user is asking a question about enterprise data, and I need to answer based on the provided documents.\n\nGiven the documents, and the reporting note in the confluence document, I think the intended answer might be \"Slack\" because:",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "The Candidate Answer provides an exploratory analysis of the documents regarding token accounting discrepancy reports across intake channels but does not conclude which channel has the most reports. It expresses uncertainty about determining the answer without count data, and does not support the Gold Answer's claim that Jira has the most. Instead, it discusses the reporting methodology and the confluence document's note about including Slack and Gmail-origin cases, but fails to affirm the Gold Answer. Since the Candidate Answer does not agree with or consistently support the Gold Answer, correct is false.",
+        "latency_sec": 44.95
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "Gmail",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "The candidate answer 'Gmail' directly contradicts the Gold Answer and Gold Facts, which state that Jira has the most reports of token accounting discrepancy. No facts from the Gold Facts list are supported by the candidate answer.",
+        "latency_sec": 87.43
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "Jira (with 3 reports)",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer correctly identifies Jira as the intake channel with the most token accounting discrepancy reports. The addition of '3 reports' provides extra context but does not contradict the Gold Answer, which establishes Jira as having the most reports.",
+        "latency_sec": 118.28
+      }
+    },
+    {
+      "question_id": "qst_0411",
+      "category": "conflicting_info",
+      "question": "On Streamly AI's dedicated pool dp-132-usw, what % of interactive burst credits should be reserved exclusively for priority=high routes?",
+      "gold_answer": "Reserve 30% of interactive burst credits exclusively for priority=high routes on dp-132-usw (an earlier suggestion was 20%, but the applied/updated target is 30%).",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "30%",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 12.49
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "30%",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 5.89
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "30%",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 19.74
+      }
+    },
+    {
+      "question_id": "qst_0412",
+      "category": "conflicting_info",
+      "question": "For extraction, what price-normalization correctness is reported at temp=0.0 with strict JSON + canonicalization, and what earlier % is it compared to?",
+      "gold_answer": "The updated mini-results report ~96% price-normalization correctness at temp=0.0 when using strict JSON plus canonicalization rules; this is compared to an earlier ~89% figure from scratch runs that did not include canonicalization.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "The price normalization correctness at temp=0.0 with strict JSON + canonicalization is ~96%. This is compared to ~89% without canonicalization.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 2.77
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "Price normalization correctness is reported at approximately 96% with temperature 0.0 and strict JSON plus canonicalization rules, compared to approximately 89% prior to the application of canonicalization rules.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 11.16
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "The price-normalization correctness at temp=0.0 with strict JSON + canonicalization is reported as 96%, which is compared to an earlier result of 14%.",
+        "correct": true,
+        "completeness": 0.2,
+        "overall_score": 0.2,
+        "reasoning": "",
+        "latency_sec": 113.3
+      }
+    },
+    {
+      "question_id": "qst_0381",
+      "category": "constrained",
+      "question": "In the planned controlled failover game day on 2026-01-15 (Hosted API us-east \u2192 eu-west), what caused the routing automation to oscillate (flip/rollback), and what follow-up ticket and target ship date were created to fix the streaming disconnect/reconnect behavior clients saw during cross-region redirects?",
+      "gold_answer": "The flip/rollback oscillation was caused by noisy/false-positive reachability health signals (including a premature \"recovery\" signal) combined with overly permissive hold-down/anti-flap and rollback guardrails, letting the controller fail over and then roll back repeatedly. The streaming redirect disconnect/reconnect follow-up was ticket ENG-2422, targeting a production ship (behind a flag) by 2026-02-07.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "I need to find information about the oscillation cause and the streaming disconnect fix in the provided documents.\n\nFirst, let me find information about the oscillation cause.\n\nLooking through the documents, I see several relevant ones:\n\nLooking at the postmortem document (dsid_d844cc30147b49c69ea5275b4993b571), I find this relevant section:\n\n\"Root cause\nThe regression was caused by **policy oscillation** (flip/rollback) triggered by **noisy reachability signals**, combined with insufficient guardrails that allowed multiple routing policy changes in a short period. The oscillation produced a traffic pattern that:\n1) **increased cross-region redirects**, and\n2) **amplified retries** at the gateway/client level,\nleading to transient overload and elevated error rates in the target region.\n\nKey technical drivers:\n- **Reachability probes produced false positives** (brief, correlated failures) that were treated as authoritative without adequate corroboration.\n- **Hold-down and anti-flap timers were too permissive** for the observed signal volatility.\n- **Rollback semantics were correct per implementation**, but not aligned with our intended ADR-level behavior (we rolled back too quickly and re-triggered failover immediately).\"\n\nAnd in the contributing factors section:\n\n\"### 1) Trigger noise and insufficient corroboration\n- Reachability was treated as \"high priority,\" but we lacked a strict requirement for corroboration (e.g., simultaneous 5xx burn or control-plane health degradation) before acting.\n- Probe failures were short-lived and likely influenced by transient provider/network behavior; the region health pipeline did not dampen enough.\n\n### 2) Rollback gaps / anti-flap guardrails\n- Policy flip rate limiting (per policy/per tenant) was not strict enough for production-like behavior.\n- The controller was allowed to both:\n  - fail over on a high-priority signal transition, and\n  - roll back on early recovery indication,\n  without a sufficiently long \"stabilization\" window.\n\n### 3) Retry amplification during routing changes\n- Gateway retry budgets and client retry behavior interacted poorly with redirects and timeouts.\n- During oscillation, some requests were retried across regions, increasing load at the exact time the target region was receiving new traffic.\n\n### 4) Observability gaps during the test\n- We had dashboards, but lacked consistent **automation-driven annotations** (start/stop, flip, rollback, reason) visible across all relevant panels.\n- Signal evaluation logs were not easily searchable by policy + decision id, slowing triage.\"\n\nSo the oscillation was caused by:\n1. Noisy reachability signals being treated as authoritative without adequate corroboration\n2. Hold-down and anti-flap timers being too permissive\n3. Rollback semantics not aligned with intended behavior (rolled back too quickly, re-triggering failover)\n4. Policy flip rate limiting not strict enough\n\nNow for the second part of the question: what follow-up ticket and target ship date were created to fix the streaming disconnect/reconnect behavior.\n\nLooking at the documents, I find several references to streaming disconnects:\n\nIn dsid_865449ae95b044768f33773263bfeaad (the main Game Day results):\n- Issue #4: \"Streaming disconnects during redirect\" - \"streaming clients experienced disconnects and did not always reconnect cleanly when redirected across regions.\"\n- Impact: \"most visible customer-facing issue; increases perceived downtime even when non-streaming succeeds.\"\n\nIn dsid_e2ce7e977e054563bb4921770cbd7a15 (Retro notes):\n- \"4) Streaming disconnects during redirect\" - \"streaming clients experienced disconnects and did not always reconnect cleanly when redirected across regions.\"\n- \"Impact: most visible customer-facing issue; increases perceived downtime even when non-streaming succeeds.\"\n\nIn dsid_54544c14e1624adebb129bc0bc1dad73 (Post-game day summary):\n- \"Streaming disconnects were reported by a couple customers whose clients did not gracefully reconnect on redirect (SUP-25322).\"\n\nIn dsid_dc578cb27bc548c7b71a7d5b2e6dfb5a (Linear action items):\n- \"3) Fix / validate streaming reconnect behavior on region redirect for long-lived sessions\"\n  - Problem: streaming sessions showed higher disconnect rate; reconnect wasn't consistently idempotent under redirect.\n  - Owner: Vikram Singh\n  - Deliverable: client-visible behavior documented + server-side redirect handling; add regression tests.\n  - Links: ENG-2422, redwood PR-19821, SUP-25322.\n\nIn dsid_ab14ca7029e344999d9e832d24939cae (Test plan):\n- Scenario A mentions \"Circuit breakers and Retry-After reduce amplification from retries.\"\n- Scenario B mentions partial impairment should NOT trigger full failover.\n\nLooking at the action items, I see in dsid_dc578cb27bc548c7b71a7d5b2e6dfb5a:\n\n\"3) Fix / validate streaming reconnect behavior on region redirect for long-lived sessions\n   - Problem: streaming sessions showed higher disconnect rate; reconnect wasn't consistently idempotent under redirect.\n   - Owner: Vikram Singh\n   - Deliverable: client-visible behavior documented + server-side redirect handling; add regression tests.\n   - Links: ENG-2422, redwood PR-19821, SUP-25322.\"\n\nAnd in dsid_e2ce7e977e054563bb4921770cbd7a15 (Retro):\n\"P0 (must-have before next production game day)\n- Add automation-driven dashboard annotations (controller recommend/execute/rollback, drain start/stop)\n  - Owner: Sergio Costa\n  - Due: 2026-01-23\n  - Notes: tie to INT-1149; ideally emitted from audit events.\n\n- Improve rollback alert text + incident-bot summary to include \"why\" (predicate fired + corroborating signals)\n  - Owner: Devon Price (incident-bot) + Ravi Menon (policy/controller payload)\n  - Due: 2026-01-24\n\n- Update runbooks: explicit steps + ownership boundaries + Hosted vs Dedicated safe actions\n  - Owner: Tom\u00e1\u0161 Nov\u00e1k + Kira Thompson\n  - Due: 2026-01-26\n  - Notes: incorporate on-call feedback from live thread.\n\n- Streaming redirect/reconnect: ship fix and add docs/SDK guidance (idempotency + backoff + reconnect)\n  - Owner: Peter Holtz (gateway) + Vikram Singh (data plane integration) + Elliot Price (docs)\n  - Due: 2026-01-31\n  - Notes: reference SUP-25322.\"\n\nAlso in dsid_54544c14e1624adebb129bc0bc1dad73:\n\"Streaming disconnects were reported by a couple customers whose clients did not gracefully reconnect on redirect (SUP-25322).\"\n\nAnd in dsid_dc578cb27bc548c7b71a7d5b2e6dfb5a:\n\"3) Fix / validate streaming reconnect behavior on region redirect for long-lived sessions\n   - Problem: streaming sessions showed higher disconnect rate; reconnect wasn't consistently idempotent under redirect.\n   - Owner: Vikram Singh\n   - Deliverable: client-visible behavior documented + server-side redirect handling; add regression tests.\n   - Links: ENG-2422, redwood PR-19821, SUP-25322.\"\n\nSo the follow-up ticket for streaming disconnect/reconnect behavior is SUP-25322, and the target ship date appears to be 2026-01-31 based on the retro notes.\n\nLet me double-check if there's a more specific ticket reference. In dsid_dc578cb27bc548c7b71a7d5b2e6dfb5a, it mentions \"ENG-2422\" as a link, and \"SUP-25322\" as another link.\n\nIn dsid_e2ce7e977e054563bb4921770cbd7a15, it says:\n\"- Streaming redirect/reconnect: ship fix and add docs/SDK guidance (idempotency + backoff + reconnect)\n  - Owner: Peter Holtz (gateway) + Vikram Singh (data plane integration) + Elliot Price (docs)\n  - Due: 2026-01-31\n  - Notes: reference SUP-25322.\"\n\nSo the ticket is SUP-25322 and the target ship date is 2026-01-31.\n\nLet me also check if there's any other ticket reference. In dsid_865449ae95b044768f33773263bfeaad, it mentions:\n\"- **Impact**: most visible customer-facing issue; increases perceived downtime even when non-streaming succeeds.\"\n\nAnd in the follow-up actions section:\n\"- Fix streaming reconnect on region redirect\n   - Owner: **Peter Holtz** / Runtime + Gateway\n   - Tracking: **ENG-2422**; related: **SUP-25322**\n   - Target: ship to production behind flag by **2026-02-07**\"\n\nWait, there's a discrepancy here. In one document it says target is 2026-02-07, in another it says 2026-01-31.\n\nLet me check more carefully.\n\nIn dsid_865449ae95b044768f33773263bfeaad (the main Game Day results):\n\"- Fix streaming reconnect on region redirect\n   - Owner: **Peter Holtz** / Runtime + Gateway\n   - Tracking: **ENG-2422**; related: **SUP-25322**\n   - Target: ship to production behind flag by **2026-02-07**\"\n\nIn dsid_e2ce7e977e054563bb4921770cbd7a15 (Retro):\n\"- Streaming redirect/reconnect: ship fix and add docs/SDK guidance (idempotency + backoff + reconnect)\n  - Owner: Peter Holtz (gateway) + Vikram Singh (data plane integration) + Elliot Price (docs)\n  - Due: 2026-01-31\n  - Notes: reference SUP-25322.\"\n\nIn dsid_dc578cb27bc548c7b71a7d5b2e6dfb5a (Linear action items):\n\"- Fix / validate streaming reconnect behavior on region redirect for long-lived sessions\n   - Problem: streaming sessions showed higher disconnect rate; reconnect wasn't consistently idempotent under redirect.\n   - Owner: Vikram Singh\n   - Deliverable: client-visible behavior documented + server-side redirect handling; add regression tests.\n   - Links: ENG-2422, redwood PR-19821, SUP-25322.\"\n\nSo there are two different target dates mentioned: 2026-01-31 and 2026-02-07. This might be because the documents were created at different times, or there were updates to the target date.\n\nLooking at the timeline:\n- The game day was on 2026-01-15\n- The retro was on 2026-01-16\n- The post-game",
+        "correct": true,
+        "completeness": 0.6,
+        "overall_score": 0.6,
+        "reasoning": "",
+        "latency_sec": 62.49
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "The routing automation oscillated during the planned controlled failover due to capacity signal lag in the Dedicated gating mechanism, where the \"safe-to-failover\" status updated slower than expected (on the order of minutes), reducing confidence in automation readiness. This was likely caused by aggregation interval and caching TTL misalignment in the capacity pipeline, combined with missing jitter alignment against region health reads.\n\nThe follow-up engineering ticket created to address streaming disconnect and reconnect behavior during cross-region redirects was ENG-2422, with a target ship date of 2026-02-07 for production deployment behind a feature flag.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 61.86
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "During the controlled failover game day on 2026-01-15 (Hosted API us-east \u2192 eu-west), the routing automation did not exhibit repeated policy flips or oscillation due to anti-flap guardrails (hold-down timers and rate limits) that prevented ping-ponging despite noisy intermediate signals. However, an unexpected partial rollback was triggered for one policy because of hold-down interplay: recovery signals caused an earlier-than-expected rollback while impairment was still partially active, which led to operator confusion about whether the system was failing over or merely shedding traffic. This ambiguity stemmed from overlapping behaviors of circuit breakers, retry budget changes, and policy weight shifts not being clearly distinguished.\n\nThe follow-up ticket created to fix the streaming disconnect/reconnect behavior clients observed during cross-region redirects is **ENG-2422**, titled **\"Fix streaming reconnect on region redirect.\"** It is owned by Peter Holtz and the Runtime + Gateway team. The target ship date to production is **February 7, 2026**, behind the feature flag `stream_redirect_reconnect_v1` (which was merged into main and staged internally before production enablement). Progress and customer impact are monitored under support ticket **SUP-25322**.",
+        "correct": true,
+        "completeness": 0.3,
+        "overall_score": 0.3,
+        "reasoning": "",
+        "latency_sec": 146.99
+      }
+    },
+    {
+      "question_id": "qst_0382",
+      "category": "constrained",
+      "question": "In the Feb 12, 2026 incident where daily usage exports briefly overstated output tokens (while invoices stayed correct), what was the root cause and what mitigation + follow-up steps were taken to prevent a repeat?",
+      "gold_answer": "Root cause was a deduplication bug in the usage exporter that counted retried streaming chunks as separate completions when the request_id changed across retry boundaries, inflating output_tokens in daily usage exports. Mitigation was to pause export generation, fix the exporter logic, then backfill and resume exports. Follow-ups were to add a daily reconciliation job comparing invoice vs export counters with paging on drift, change dedup to use a stable trace id across retries, and add a contract test covering streaming retry semantics.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "**Root cause**  \nA deduplication bug in the usage exporter treated retried streaming chunks as distinct completions when the request ID changed across retry boundaries. This caused output tokens to be overstated in daily usage exports for ~6 hours on 2026-02-12.\n\n**Mitigation taken during the incident**  \n- 18:05 UTC: Export generation was paused.  \n- Backfill performed with corrected logic.  \n- 22:10 UTC: Exports resumed with the dedup fix in place.\n\n**Follow-up steps to prevent a repeat** (from the postmortem action items)  \n1. **Add reconciliation job** comparing invoice counter vs. export counter per workspace per day; page on drift > 0.5%. Owning team: Eng SRE.  \n2. **Fix usage exporter dedup logic** to use a stable trace ID across retries. Owning team: Eng Platform.  \n3. **Add contract test** in the usage pipeline for streaming retry semantics. Owning team: Eng Platform.\n\n**Note:** Billing invoices were unaffected because invoice generation uses a separate validated counter, distinct from the usage export pipeline.",
+        "correct": true,
+        "completeness": 0.5714,
+        "overall_score": 0.5714,
+        "reasoning": "",
+        "latency_sec": 23.3
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "On February 12, 2026, a deduplication bug in the usage exporter caused daily export files to overstate output tokens for some chat requests. The issue occurred when retried streaming chunks were treated as distinct completions if the request ID changed across retry boundaries. The hosted API itself was unaffected; the problem was isolated to the usage aggregation pipeline and export files. Billing invoices remained correct because they use a separate validated counter.\n\nTo mitigate the impact, export generation was paused around 18:05 UTC, and a backfill was performed once the fix was applied. Exports resumed at 22:10 UTC with the corrected logic in place.\n\nTo prevent a recurrence, the following follow-up actions were defined: \n- A reconciliation job was added to compare invoice counters against export counters per workspace per day, with alerts triggered on drift exceeding 0.5% (owned by Eng SRE). \n- The usage exporter\u2019s deduplication logic was fixed to use a stable trace ID across retries (owned by Eng Platform). \n- A contract test was added to the usage pipeline to cover streaming retry semantics (also owned by Eng Platform).",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 25.78
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "**Root Cause:**  \nA deduplication bug in the usage exporter treated retried streaming chunks as distinct completions when a request ID changed across retry boundaries. This caused the daily usage exports to briefly overstate the number of output tokens.\n\n**Mitigation:**  \nExport generation was paused and a backfill was performed after the fix was applied, with exports resuming using the corrected logic.\n\n**Follow-up Actions:**  \n1. Implement a reconciliation job that compares invoice counter versus export counter per workspace per day, with paging on drift exceeding 0.5%.  \n2. Fix the usage exporter deduplication logic to use a stable trace ID across retries.  \n3. Add a contract test in the usage pipeline for streaming retry semantics.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 58.52
+      }
+    },
+    {
+      "question_id": "qst_0471",
+      "category": "high_level",
+      "question": "What is Redwood Inference's mission statement?",
+      "gold_answer": "Make high-performance, reliable LLM inference accessible to every engineering team.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Make inference predictable, affordable, and operable so engineering teams can ship features rather than fight infrastructure.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 18.43
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "Empty Response",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 2.08
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "Make inference predictable, affordable, and operable so engineering teams can ship features rather than fight infrastructure.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer rephrases the mission statement with different but consistent wording; core claims about making inference accessible/manageable for engineering teams are fully aligned with the gold answer, and no contradictions exist.",
+        "latency_sec": 24.43
+      }
+    },
+    {
+      "question_id": "qst_0472",
+      "category": "high_level",
+      "question": "What is the company's thesis about where competitive advantage shifts as LLM ecosystems expand?",
+      "gold_answer": "As LLM capabilities and open model ecosystems expand, competitive advantage shifts from model ownership to serving: latency, cost, reliability, deployment flexibility, and operational tooling.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Based on Redwood's positioning documents, the company's thesis about where competitive advantage shifts as LLM ecosystems expand is:\n\n**Competitive advantage shifts from model ownership/access to serving/infrastructure mastery.** Specifically, as models proliferate and become more commoditized, the differentiator becomes who can reliably deliver predictable, cost-efficient, and operationally stable inference at scale.\n\nKey elements of this thesis across Redwood's positioning materials:\n\n- **From model access to serving**: \"The competitive margin for AI shifts from model access to serving: shipping LLM features is now about consistent latency, controllable cost, and safe rollouts.\" (dsid_43fe8ac81b2e400bb40826eea40487d7)\n\n- **From model ownership to serving economics**: \"Competitive advantage in AI shifts away from model ownership toward mastery of serving: controlling cost per useful token, predictable latency, and operational resilience across cloudy, dedicated, and private footprints.\" (dsid_12d7a6daedf34b63a7d61b599595da45)\n\n- **From model quality to serving reliability**: \"The economics and reliability of serving, not model access, determine the winner in production LLM applications. Teams succeed when they can control latency, unit cost, and risk while iterating quickly.\" (dsid_5278fe1983644b93b3e5dc5271002dcf)\n\n- **From raw model capability to operational predictability**: \"As models proliferate and hardware evolves, advantage shifts from model ownership to who can reliably deliver user-facing inference \u2014 with consistent latency, controllable unit cost, and operational guardrails.\" (dsid_db763ed92fb747ff85cf19cab63f2200)\n\n- **From experimentation to productization**: \"As teams move from experimentation to productization, control over model outputs becomes less differentiating than control over serving. The advantage shifts to whoever can guarantee consistent economics and operational stability across cloud, dedicated, and private deployments.\" (dsid_cd352e37bc724ce1a8be8d25a2668dcf)\n\nThe consistent theme is that in production LLM deployments, the competitive moat moves from having the best/most models to having the best serving infrastructure\u2014predictable latency, controllable costs, operational guardrails, and deployment parity across environments.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer's core claim\u2014that competitive advantage shifts from model ownership to serving as LLM ecosystems expand\u2014is directly consistent with the Gold Answer. It elaborates on the same shift with additional Redwood-specific details, but does not contradict or conflict with the Gold Answer. Both Gold Facts are directly stated or clearly implied by the candidate answer.",
+        "latency_sec": 19.72
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "The company's thesis is that competitive advantage shifts from model access to operational serving capabilities. As stated in the core thesis: \"Serving is the new moat: Companies win by operationalizing inference \u2014 reducing token cost, stabilizing latency, and embedding graceful degradation policies.\" The narrative emphasizes that \"the market is saturated with model access \u2014 what differentiates production apps is how models are served at scale,\" and that \"production success is about consistent economics and operational risk\" rather than just model capability.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 11.94
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "Redwood's thesis positions **serving LLMs** (operationalizing inference) as the new defensible moat, rather than mere model access. As LLM ecosystems expand and saturate, competitive advantage shifts toward:\n\n1. **Economic predictability** \u2013 reduced token cost and predictable unit costs.\n2. **Operational risk management** \u2013 stabilized latency, graceful degradation, fallbacks, and SLAs for continuity.\n3. **Unified developer experience** \u2013 a single control plane across hosted, reserved, and private deployment modes, eliminating engineering divergence.\n4. **Production-ready tooling** \u2013 observability, rollback/rollout workflows, and cost controls to prevent silent UX degradation.\n\nThe company distinguishes itself from peers (model catalogs, simple endpoints, pure infra vendors, or token-savings-only tools) by emphasizing **system-level guarantees, policy layers, and SLO-safe cost optimizations** as the true differentiators in production applications.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer is fully consistent with the gold answer. It correctly identifies the shift from model ownership to serving as LLM ecosystems expand, and it enumerates serving advantages (latency, cost, reliability, deployment flexibility, operational tooling) through its points on economic predictability, operational risk management, unified developer experience, and production-ready tooling. No claims contradict the gold answer, and all gold facts are directly supported or clearly implied.",
+        "latency_sec": 42.56
+      }
+    },
+    {
+      "question_id": "qst_0481",
+      "category": "info_not_found",
+      "question": "For the hot-route capacity protection rollout in us-east, which specific enterprise accounts were on the initial allowlist, and what were the exact per-route-group budget values (RPS, estimated TPS, and concurrency) configured for each of those accounts?",
+      "gold_answer": "The answer must state at some point that the query is not fully answerable from available documents or caveat the provided information with why it does not fully address the query. The answer may present relevant and related information to be helpful to the user however it must clearly also mention that at least some aspects are not found or answered. The answer may also simply state that the query is not answerable from the documents, this is perfectly acceptable.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Based on the provided design and rollout documentation, the specific enterprise account IDs on the initial us-east allowlist and their exact per-route-group budget values (RPS, estimated TPS, concurrency) are **not disclosed** in the excerpts. The docs consistently treat these as execution-time, per-region, feature-flagged values rather than design-spec constants.\n\n### What the context does specify:\n\n1. **Allowlist size & intent**  \n   - The MVP rollout (Phase 2) targets a \"canary in us-east, then expand us-east, then eu-west\" sequence.  \n   - Phase 4 (Enterprise canary, week 6) notes: *\"Allowlist 3\u20135 enterprise accounts\"* \u2014 but does **not list the accounts themselves** or assign budget values per account.  \n   - The launch checklist states: *\"Canary account list confirmed by Product + SRE (do not change during window unless rollback)\"* \u2014 confirming an allowlist exists but its contents are omitted from the shared excerpts.\n\n2. **Budget model (illustrative only)**  \n   - Example budget defaults appear in multiple docs (e.g., `dsid_f8f2a15050004a74b8b1f7e8f4377786`, `dsid_116f78f1abc743abb7b1def1c7ffe8ef`):  \n     | Route group | Tier | RPS limit | TPS limit (estimated) | Concurrency limit | Reserved? |\n     |------------|------|----------:|-----------------------:|------------------:|----------|\n     | chat       | enterprise | 250 | 1.2M | 3,000 | Yes |\n     | chat       | starter    | 30  | 80k  | 250   | No   |\n     | embeddings | enterprise | 400 | 900k | 2,000 | Yes |\n     | embeddings | starter    | 60  | 120k | 400   | No   |\n     | rerank     | enterprise | 300 | 600k | 1,500 | Yes |\n   - These are explicitly labeled *\"illustrative only; actual values are set per region based on capacity planning\"* and *\"consult the policy matrix doc for current numbers.\"* They are **not** tied to specific us-east accounts in the provided text.\n\n3. **Per-route/group budget hierarchy**  \n   - Budgets are defined at five levels (tenant+route-group override \u2192 tenant override \u2192 tier+route-group default \u2192 tier default \u2192 global safety caps).  \n   - The us-east canary would apply budgets via this hierarchy, but the actual per-account overrides or tier-default values are configuration entries stored in the config registry (referenced via `rwctl`), not exposed in the design overviews.\n\n4. **Rollout sequencing**  \n   - Phase 1: Shadow/metrics only  \n   - Phase 2: Gateway rate limits (us-east, best-effort only)  \n   - Phase 3: Admission control + priority routing (us-east)  \n   - Phase 4: Enterprise canary (3\u20135 accounts, expand if stable)  \n   - Phase 5: Multi-region expansion (eu-west)  \n   - No phase discloses actual account IDs or the budget values assigned to them.\n\n### What is **not** in the context:\n- A concrete list of us-east enterprise account IDs (e.g., `tnt_XXXX`).\n- Exact RPS/TPS/concurrency values configured for those specific accounts.\n- Per-account budget override entries or their expiration/ticket links.\n- Any \"current numbers\" beyond the illustrative examples above.\n\n### Where this information likely resides:\n- **Config registry** via `rwctl` (e.g., `rwctl config locate`, `rwctl policy eval`, `rwctl config diff`).\n- **Release/rollout notes** for the specific us-east canary window (likely tracked under ENG-4921 epic and associated PRs).\n- **SRE/Platform on-call handoffs** during the canary phase, where allowlist accounts and their budget allocations are validated before wider expansion.\n\nIf you need the actual us-east allowlist and their deployed budget values, the fastest path is to check the config",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "",
+        "latency_sec": 42.94
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "The provided documentation outlines the hot-route capacity protection rollout framework, including Phase 4's allowance for 3\u20135 enterprise accounts in the us-east canary, the configuration of route groups, priority classes, and budget structures, and the open questions around allowlisting and budget sizing. However, the specific enterprise account identifiers on the initial us-east allowlist and the exact per-route-group budget values (RPS, estimated TPS, and concurrency) configured for those accounts are not listed in the given materials. The documents describe the rollout methodology, phase goals, and decision points, but leave those concrete details unspecified.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer explicitly states that the specific enterprise account identifiers and per-route-group budget values are not listed in the given materials, and that the documents leave those details unspecified. This directly satisfies the gold fact requirement that the answer must indicate the query is not fully answerable from available documents or caveat why it does not fully address the query. The candidate also provides relevant contextual information about the rollout framework while clearly noting the information gaps.",
+        "latency_sec": 55.4
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "The specific enterprise accounts on the initial allowlist for the us-east hot-route capacity protection rollout, along with their exact per-route-group budget values (RPS, estimated TPS, and concurrency), are not documented in the provided internal knowledge base. The search tool indicates that such allowlist details are typically confirmed with Product and SRE prior to rollout and are not published in the accessible records. General enterprise tier budget parameters per route group are available as example defaults (chat: 250 RPS, 1.2M TPS, 3,000 concurrency; embeddings: 400 RPS, 900k TPS, 2,000 concurrency; rerank: 300 RPS, 600k TPS, 1,500 concurrency), but these are not mapped to specific accounts. To obtain the exact allowlist and account-tied budget configurations, coordination with the relevant Product and SRE teams through the official change management process (Linear ticket, Support/Jira) is required.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer explicitly states that the specific enterprise accounts and per-route-group budget values are not documented in the provided internal knowledge base, and that such details are typically confirmed with Product and SRE prior to rollout. This directly aligns with the Gold Answer's requirement to state when information is unavailable, without contradicting it. The candidate correctly refuses to provide account-specific values while offering general defaults, which is consistent with the prescribed caveatting approach.",
+        "latency_sec": 249.74
+      }
+    },
+    {
+      "question_id": "qst_0482",
+      "category": "info_not_found",
+      "question": "What exact queue-depth threshold and prefill/decode interleaving-ratio cutoffs are currently configured in production to allow FP8 attention in **decode** on H100 hosted pools (i.e., the scheduler interaction guardrail mentioned in the FP8/INT8 kernel auto-selection heuristics)?",
+      "gold_answer": "The answer must state at some point that the query is not fully answerable from available documents or caveat the provided information with why it does not fully address the query. The answer may present relevant and related information to be helpful to the user however it must clearly also mention that at least some aspects are not found or answered. The answer may also simply state that the query is not answerable from the documents, this is perfectly acceptable.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Here's a thinking process:\n\n1.  **Analyze User Input:**\n   - User is asking for specific technical details: \"What exact queue-depth threshold and prefill/decode interleaving-ratio cutoffs are currently configured in production to allow FP8 attention in **decode** on H100 hosted pools (i.e., the scheduler interaction guardrail mentioned in the FP8/INT8 kernel auto-selection heuristics)?\"\n   - This is a very specific question about production configuration values.\n\n2.  **Scan Context for Relevant Information:**\n   I need to look through the provided text to find mentions of queue-depth thresholds, prefill/decode interleaving ratios, FP8 attention in decode, H100 hosted pools, and scheduler guardrails.\n\n   Let me search through the documents:\n\n   - `dsid_bb081239eeb44308b442643c7672c105`: GitHub PR description about kernel autoselect heuristics. Mentions guardrails, shape regime bucketing, FP8/INT8 selection. Has some details about when FP8 is preferred/avoided.\n   - `dsid_8be47e742d7c4ddaae9b7d73410df51a`: Linear document about FP8/INT8 kernel benchmarking sprint epic. Has a lot of context but I need to find specific thresholds.\n   - `dsid_9a2434a7ebfc449cab29355de1303458`: Google Drive daily notes. Contains many discussion points about canary, heuristics, scheduler instrumentation.\n   - `dsid_2e24eba1fd824cc3bd2abaa485eff749`: Slack architecture discussion. Contains a lot about ADR-019, guardrails, fallback rules, canary thresholds.\n   - `dsid_b188c049f6a640609ec88799d75fdc01`: Confluence ADR-019 document. This is the official ADR. Has detailed heuristics, guardrails, fallback rules.\n   - `dsid_417aa39cba3b4d1a968bbd41ba8acd79`: Fireflies meeting notes about FP8 vs INT8 deep dive.\n   - `dsid_7aa32148c5b24ab0a709e78e55b7285a`: Google Drive exec readout draft. Has slide 10 about canary outcome, slide 11 about risks, slide 12 about rollout plan.\n\n   Let me look for specific queue-depth thresholds and prefill/decode interleaving-ratio cutoffs for FP8 attention in decode on H100.\n\n   From `dsid_2e24eba1fd824cc3bd2abaa485eff749` (slack architecture):\n   - \"Noah Patel: Please avoid cross-op coupling (e.g., \"if attention is FP8 then matmul must be FP8\"). Keep it per-op to reduce blast radius.\"\n   - \"Sofia Ivanova: Another rollout nuance: scheduler knobs may be required to realize perf wins. If we ship kernel changes + scheduler changes at the same time, canary attribution gets messy. ADR suggests shipping behind flags; can we stage: 1) land kernel flags (off) 2) canary kernels alone 3) then canary scheduler tweaks\"\n   - \"Hiro Tanaka: That's the plan. Kernel path flags first; scheduler knob defaults in a separate flag group. We can do separate cohorts.\"\n   - \"Noah Patel: Complexity is fine if it's testable and stable. But please don't key dispatch off counters that are inherently noisy.\"\n   - \"Yuki Sato: Action items I'll take from this thread: - Add explicit KV cache alignment/stride guards (attention decode) - Remove \"instantaneous batch>=2\" gating; switch to scheduler policy bit - Add long-context \"do not FP8\" test case - Clarify fallback order and kill switches per op - Add section: correctness enforcement (CI/evals) vs runtime capability fallback\"\n   - \"Claire Dubois: Yes. Adding a section: reproducibility + non-goals (heuristics are based on architecture + known kernel constraints, not fragile microbench wins).\"\n   - \"Allison Grant: For canary: please ensure we tag metrics with \"kernel_mode=fp8|int8|baseline\" AND \"kernel_id\" if possible (even a short enum). Otherwise debugging is painful.\"\n   - \"Julian Moore: Kernel_id tag might be high-cardinality if it includes shape. But we can tag \"kernel_impl=flashattn_fp8_v2\" / \"gemm_int8_cutlass_x\" etc. Controlled enum.\"\n   - \"Rafael Mendes: Works. And add a runbook step: how to disable per region/model quickly.\"\n   - \"Jonas Weber: One more: correctness checks. ADR mentions \"correctness fallback\", but what does that mean at runtime? We can't do per-request golden compare. So it should mean \"offline correctness suite + CI smoke\" and runtime fallback only for explicit unsupported shapes / internal kernel error codes.\"\n   - \"Hiro Tanaka: Exactly. Runtime fallback is based on capability checks + kernel return status; correctness is enforced in CI + perf canary catches systemic regressions.\"\n   - \"Noah Patel: Then the ADR should say that explicitly so it's not misread as \"runtime validates correctness.\"\"\n   - \"Yuki Sato: Action items I'll take from this thread: - Add explicit KV cache alignment/stride guards (attention decode) - Remove \"instantaneous batch>=2\" gating; switch to scheduler policy bit - Add long-context \"do not FP8\" test case - Clarify fallback order and kill switches per op - Add section: correctness enforcement (CI/evals) vs runtime capability fallback\"\n   - \"Claire Dubois: Great. Once those edits are in, I'm comfortable marking ADR-019 approved.\"\n   - \"Rafael Mendes: Same, with the caveat that canary + rollback language is included (even if thresholds live in the runbook). :thumbsup:\"\n   - \"Allison Grant: +1. I'll sync with Julian on metric tags and update dashboard spec.\"\n   - \"Jonas Weber: Approved pending the \"eligible vs default enablement\" clarification + link to eval sign-off criteria.\"\n   - \"Hiro Tanaka: Thanks all. We'll incorporate and post updated ADR link here for final ack.\"\n   - \"Claire Dubois: :white_check_mark: Please tag me on the update; I'll add the decision note + date at the end of the ADR once merged.\"\n\n   From `dsid_b188c049f6a640609ec88799d75fdc01` (confluence ADR-019):\n   - Section 5) Fallback rules (hard requirements)\n   - Section A) Correctness guardrails\n   - Section B) Performance guardrails\n     - \"No TTFT regression policy for decode-dominant endpoints: Default decode attention remains baseline unless explicitly enabled per model.\"\n     - \"Scheduler interaction guardrail: FP8 attention in decode is only eligible if queue depth and batch formation are stable:\n       - Example: if prefill queue depth > threshold or if prefill/decode interleaving ratio indicates high churn, keep baseline for decode attention.\n       - (Exact thresholds are owned by Serving Runtime Scheduling; this ADR requires the gate to exist.)\"\n   - Section C) Observability and attribution\n   - Rollout plan phases\n   - Guardrails details\n   - Consequences\n   - Implementation notes\n   - Open questions / follow-ups\n     - \"1) Evaluate enabling FP8 decode attention for specific models after scheduler tuning stabilizes batching (owner: Sofia Ivanova).\"\n     - \"2) Expand FP8 attention eligibility to d_head=80/96 after additional TTFT-focused benchmarking (owner: Hiro Tanaka).\"\n     - \"3) Determine whether we should introduce a \"tiny-batch decode\" specialized path to reduce launch overhead (owner: Grace Kim).\"\n\n   From `dsid_9a2434a7ebfc449cab29355de1303458` (google drive daily notes):\n   - \"2026-02-16 (Mon) \u2014 Scheduler instrumentation lands + mixed workload definitions stabilized\"\n     - \"Mixed workload profiles (final-ish names):\n       - MIX-A: short prompts, medium generation, concurrency 16 (TTFT-sensitive).\n       - MIX-B: medium prompts, longer generation, concurrency 32 (TPOT/throughput-sensitive).\n       - PREFILL-only: long prompts (stress prefill kernel).\n       - DECODE-only: steady-state decode (stress KV cache + attention).\"\n     - \"Decision: All \"claims\" in matrix must specify which profile. No mixing/averaging across profiles without footnote.\"\n   - \"2026-02-17 (Tue) \u2014 FP8 attention TTFT regression thread + proposed guardrail\"\n     - \"Findings:\n       - TTFT regression only appears in MIX-A and mostly on one model family with smaller hidden size.\n       - When batching window is reduced, TTFT improves but TPOT drops slightly.\"\n     - \"Proposed guardrail (Hiro + Sofia aligned tentatively):\n       - Only select FP8 attention for seq-len regime >= threshold OR when concurrency >= threshold (where throughput wins matter and TTFT regression is less pronounced).\n       - Else fall back to baseline attention kernel for TTFT-critical regimes.\"\n     - \"TODO:\n       - Yuki to encode guardrail in heuristic PR (PR-19863 / later PR-7430 implementation work).\n       - Omar to quantify scheduler parameter sensitivity: does tweaking batching window allow safe FP8 enablement in MIX-A?\"\n   - \"2026-02-18 (Wed) \u2014 Canary planning starts + noisy alert concerns\"\n     - \"Allison draft dashboard dimensions: model/GPU/region/mode, plus TTFT/TPOT/tokens-s, GPU mem, error rate.\"\n     - \"Rafael: perf canary alerts too noisy with small sample sizes; need noise suppression + minimum sample threshold.\"\n     - \"Decision:\n       - Canary gating must be per model + region (not global). Auto-rollback should only trigger when both (a) threshold breach and (b) sample >= N, OR when absolute error rate spike occurs.\"\n     - \"Open question:\n       - What's our \"acceptable\" TTFT p95 regression for a canary? (We've been using 3%\u20135% as rough, but need to calibrate vs variance.)\"\n   - \"2026-02-19 (Thu) \u2014 Heuristics review + metadata completeness\"\n     - \"Heuristics review thread: sources/slack/eng-runtime/1776430817-kernel-autoselect-heuristics-review.json\"\n     - \"Main points:\n       - Prefer INT8 matmul in regimes where it's stable + correctness proven; otherwise FP8 attention is the bigger win for decode-heavy.\n       - Must include fallback rules (shape constraints, head dim alignment, KV cache alignment edge cases).\"\n     - \"Metadata:\n       - PR-19880: artifact uploader now attaches driver/CUDA, clocks state, model hash, and kernel mode.\n       - Remaining gap: scheduler config snapshot and batching window values need to be exported too (Omar/Julian to add).\"\n   - \"2026-02-20 (Fri) \u2014 First \"full-ish\" matrix day: H100 top 4 models; A100 baseline + INT8\"\n     - \"H100:\n       - Completed baseline + FP8 attention for 4 models across DECODE-only + MIX-B.\n       - MIX-A still not fully stable for one model (TTFT p95 variance). Suspect queueing + backpressure interactions.\"\n   - \"2026-02-21 (Sat) \u2014 KV cache alignment fix tested + scheduling knob tradeoffs\"\n     - \"PR-19871 (KV cache alignment) appears to eliminate the step-function TPOT spikes in our problematic case.\"\n     - \"Scheduler knob discussion (thread): sources/slack/eng-runtime/1776439004-scheduler-knobs-batching-window-tradeoffs.json\"\n     - \"Takeaways:\n       - To realize FP8 wins E2E, we may need to tune batching window + backpressure defaults slightly (especially in MIX-B).\n       - But tightening the window improves TTFT; loosening improves throughput; we need per-tier/per-mode defaults? (or at least a \"benchmark mode\" vs \"prod mode\" alignment.)\"\n     - \"Action:\n       - Sofia/Lena to propose \"new default\" for mixed workloads that improves realized kernel gains without hurting TTFT.\"\n   - \"2026-02-22 (Sun) \u2014 Debug logging regression confirmed + fix in flight\"\n     - \"Marcus confirmed a debug logging path impacted benchmark timings for a subset of runs.\"\n     - \"PR-19918 created to gate/remove debug logging in benchmark mode.\"\n   - \"2026-02-23 (Mon) \u2014 Canary gate implementation + first region cohort discussion\"\n     - \"PR-19896 adds per model/region gating + rollback logic.\"\n     - \"Rollout planning thread: sources/slack/eng-runtime/1776451055-canary-plan-which-regions-first.json\"\n     - \"Proposed canary order (tentative):\n       - Start in one low-traffic region with good observability + stable fleet config, then expand.\n       - Avoid",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 66.35
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "The provided documentation does not specify exact production-configured queue-depth threshold numeric values or prefill/decode interleaving-ratio cutoffs as fixed settings for allowing FP8 attention in decode on H100 hosted pools. Instead, the FP8/INT8 kernel auto-selection heuristics govern FP8 preference for decode based on shape regimes\u2014preferring FP8 when decode sequence length is at most 512 and head dimension is 64 or 128\u2014with guardrails requiring head dimension in {64,128}, hidden size divisible by 128, KV cache alignment, and kernel registry support. Scheduler guardrails described include dynamic backpressure triggered when queue depth or time-in-queue exceeds configurable thresholds, and a prefill/decode fairness floor set at 0.15 for H100 presets, with queue-age trip counters logged for observability. Exact numeric thresholds configured in production are not detailed in the given materials.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 218.62
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "Based on the internal engineering documentation, **no single numeric \"queue-depth threshold\" or \"prefill/decode interleaving-ratio cutoff\" is configured as a production guardrail to allow FP8 attention in decode on H100 pools.** \n\nThe scheduler interaction guardrails for FP8/INT8 kernel auto-selection operate on **shape regime bucketing** rather than queue depth or interleaving ratios. FP8 attention in decode is conditionally enabled when all of the following hold:\n- `head_dim \u2208 {64, 128}`\n- `hidden_size % 128 == 0`\n- KV cache alignment constraints are satisfied\n- Decode sequence length \u2264 512 (if seq_len > 512, the path falls back to INT8 on A100 or baseline FP16/BF16)\n\nRegarding interleaving: the observation explicitly states **\"No single numeric 'interleaving ratio cutoff' is configured as a production threshold.**\" Instead, prefill/decode phase is determined by scheduler-provided phase hints (Prefill/Decode), and dispatch respects the correct workload phase via shape regime bucketing (prefill buckets {\u2264512, 513\u20132048, >2048}; decode buckets {\u2264128, 129\u2013512, >512}). Kernel selection is determined by the intersection of head_dim, hidden_size, seq_len, and batch composition.\n\nRegarding queue depth: the production guardrails that prevent queue depth spikes and throughput drops are **capacity and isolation controls**, not numeric queue-depth thresholds. These include:\n- An 80% hard cap on allocatable H100s for benchmark jobs (preserving 20% headroom)\n- Node taints/tolerations and admission controller policies that enforce hard separation between dedicated pools and benchmark workloads\n- Time-window scheduling (majority of heavy runs scheduled 7pm\u20137am local cluster time)\n- Mandatory job labeling (`bench_sprint_fp8int8`) with namespace quotas\n- An automated \"Dedicated collision check\" in capacity reservation that validates time windows and cluster allowlists before staging capacity\n- Feature flags (`runtime.kernel_autoselect_v2_enabled`, `runtime.kernel_autoselect_v2_allow_fp8`) and per-model/per-region overrides via the model registry, with automatic rollback triggers on metric breaches (e.g., p95 TTFT increase +10% over 15 minutes, or error rate increase +0.2% absolute)\n\nIn summary, FP8 attention in decode on H100 is gated by tensor-shape compatibility (head dimension, hidden size modularity, KV alignment, and decode seq_len), not by queue depth or interleaving-ratio cutoffs. Queue-depth and contention management are handled through the above capacity-reservation, isolation, and feature-flag mechanisms.",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "The candidate answer does not state that the query is not fully answerable from available documents or caveat the provided information, which is required by the Gold Answer and Gold Facts. Therefore it fails the correctness criterion.",
+        "latency_sec": 356.16
+      }
+    },
+    {
+      "question_id": "qst_0301",
+      "category": "intra_document_reasoning",
+      "question": "During the 2025-02-10 capacity incident, what two thresholds should trigger noisy-tenant detection in the runbook update, and how long were SLA targets breached?",
+      "gold_answer": "The runbook should flag a noisy tenant when eviction_rate exceeds 0.5% and 99.9th-percentile latency rises to more than 2\u00d7 baseline. SLA targets were breached for about 45 minutes.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Here's a thinking process:\n\n1.  **Analyze the User's Request:**\n    *   **Question:** During the 2025-02-10 capacity incident, what two things should trigger-tenant detection in the runbook update, and how long were SLA targets breached?\n    *   **Key elements to extract from the context:**\n        *   Event date: 2025-02-10\n        *   What triggers tenant detection in the runbook update?\n        *   Duration SLA breach breach breach breach breach: how long were they breached?\n\n2.  **Scan the Provided Text for Relevant Information:**\n    *   I need to find the section about the 2025-02-10 incident.\n    *   Look for \"runbook update\", \"tenant detection\", \"SLA breach breached\", \"duration\".\n\n    Let's search through the docs.\n\n    *Doc 1 (dsid_084...):* This is the Slack log from 2025-02-08 (or similar). It mentions the incident: \"Pager: SLA_BREACH high for tenant=greenridge prod \u00b7 4 p50 token latency breaches in last 5m\". It discusses: \"mike (sre): looks like a burst of long prompt requests from greenridge route. metrics show steady success but token latency to 2.4s p95 for that tenant.\" \"jess (oncall): ok. first task: mute the SLA pager for that tenant while we add a dimensionalized alert, and create a temporary panel. does anyone object to a 30m silence?\" \"infra-bot: Executing: /pager mute --pager SLA_BREACH --filter \"tenant=greenridge\" --by oncall=jess -- 30m\". So here, the SLA was muted for 30m. Also, the detection: \"ryan (metrics): +1 to dimensionalize. Current check: check.sla_breach.count > 0 for any tenant over 3m window. Proposal: change to check.sla_breach.count{tenant} > 0 and require >=3 breaching requests in 5m or p95 latency > 1.2s.\" So the detection criteria mentioned: \">=3 breaching requests in 5m or p95 latency > 1.2s\".\n\n    *Doc 2 (dsid_ca18...):* This is about \"Reservation surge remediation\". It mentions \"2025-02-10 capacity incident a single tenant's sudden high-consequence, long-sequence exhausted pooled and triggered widespread soft-eviction and tail latency across two dedicated customers.\" Impact: \"production: several customers experienced >10x tail latency and a small number of requests were retried/; production SLA targets were breached for ~45 minutes.\" So SLA breached for ~45 minutes.\n\n    *Doc 3 (dsid_3d85...):* About capacity bridging. \"2025-02-10 09:12 UTC: Pager triggered - dedicated-pool headroom alarm\". Duration: \"Duration: 72 minutes from alert to full remediation on all dedicated customers\". But this is about dedicated pool, not the same incident maybe? Wait, the date is 2025-02-10. It says \"Peak 95th-percentile latency: +420ms above baseline for affected dedicated routes. Error rate spike: 6.8% failed requests for dedicated routes during incident window. Duration: Duration: 72 minutes from alert to full remediation on all dedicated customers.\" And \"Number of customers: 7 reserved accounts (3 high-traffic).\"\n\n    *Doc 4 (dsid_fbc41...):* 2026-02-08 incident. \"During a high-severity capacity incident on 2026-02-08 a single tenant's bursty inference pattern caused sustained churn and a token-burst that propagated-neighbor effects across a dedicated pool. This ticket the post-incident runbook, detection rules, automated (soft-fence), a burst-window, and tracking for rollout to all dedicated clusters. The goal is to contain them before they force eviction or other P99 latency beyond SLOs.\" Impact: \"Result: 3% of active experienced >2x P99 latency for 18 minutes and two eviction events in cluster dc-us-west-2-03.\" So SLA breached for 18 minutes? Wait: \">2x P99 latency for 18 minutes\". Also: \"alerting triggered after eviction began\". Detection detection: \"Alerting gap: our headroom alarm threshold fired but runbook escalation lagged because the on-call page contained an escalation matrix\". And acceptance_criteria: \"Alerting-tenant pattern and triggers soft-fence within 60 seconds of threshold in >= 90% of incidents\". But the question is about 2025-02-10.\n\n    *Doc 5 (dsid_b586...):* This is the \"Gradual latency: capture &\" doc. It describes the 2025-02-08 incident in detail. \"Why this matters: - customers expect p95/p99. Gradual drift degrades SLAs and increases token cost (retries). - This incident showed an emergent class of failure where slow resource + hysteresis produced repeatable.\" High-level timeline: \"- 2025-02-08 04:10: first subtle p95 uptick observed on pool-gamma (0.2s -> 0.5s) in perfboards. - 2025-02-08 09:30: alert threshold for pool p95 crossed; auto-ticket created (JIRA-3487). - 2025-02-09 01:00: on-call manually (add 2 nodes) to reduce steady latency; limited improvement. - 2025-02-09 06:15: latency partially recovered but repeated micro-spikes began (~5\u201310m every hour). - 2025-02-09 14:40: heavy tenant (customer X, internal tenant id T-1024) observed high short variance in memory alloc + cache churn during. - 2025-02-09 16:05: rolled a temporary routing policy to evict T-1024 to a quarantine pool; subsided within 30m. - 2025-02-10 02:00: incident declared stable; follow-up work started.\" And: \"Immediate actions applied (play-by-play): - 2025-02-09 07:00: increased alert sensitivity to p95 slope (5m window) to detect re-emergence faster. - 2025-02-09 12:20: temporarily increased pool target size by +2 nodes and disabled scale-down hysteresis (override) to observe behavior. - 2025-02-09 16:05: moved T-1024 to quarantine pool with taints+tolerations; observed p95 drop from 0.9s -> 0.32s in 30m. - 2025-02-09 18:10: reconfigured batch-scheduling policy to avoid high-memory with low-latency (short-term tweak).\" And runbook draft: \"1) Alert: p95(pool) > 2x baseline for 30m OR p95 derivative > 0.5s per 15m -> paging SRE. - Query: top-10 by ephemeral-vram-alloc (5m), kv-cache-size-by-tenant (5m), pod_cpu and pod_gpu metrics. 2) Quick triage - Check quarantine pool load and last 6 hours of caler events. - Run: curl -s $RUNTIME/targetants?pool=POOLNAME | jq . | head. - If a single tenant accounts for >30% peak usage and increases temporally with time, consider quarantine move. 3) Mitigation options (order): - Soft: increase pool capacity by +1 and disable scale-down for 1 hour. -: apply taint to tenant nodes and annotate tenant. - Hard: route tenant to dedicated quarantine pool (billing/owner notification required). 4) Post-mitigation checks - p95/p99 over next 2 hours, ensure no regression in other routes.\"\n\n    *Doc 6 (dsid_3e4e...):* 2026-03-08 incident. \"During a peak on 2026-03-08 we observed repeated microbursts across three dedicated clusters. Root cause analysis shows a combination of under-provisioned tenant, a burst decay that was too permiss for small, and an admission path that let long-running batched jobs acquire burst tokens without accounting for request tail latencies. Impact: several customers experienced transient 500s and elevated latency that breached SLOs for the cluster-tiered SLA. Outage window: 2026-03-08 02:12 UTC to 2026-03-08 05:40 UTC.\" So SLA breached during that window: from 02:12 to 05:40 UTC, which is 3 hours 28 minutes. Also: \"alerting on eviction rate and p99 latency triggered first; on-call correlation with recent resize API calls highlighted a tenant that had reduced by 40% the prior day.\" And action_items include: \"Observability: add regression alert on 'reservation-to-traffic-ratio' dropping below 0.6 for >30m; owner: SRE; ETA: 2026-03-16\". So detection trigger: \"reservation-to-traffic-ratio\" dropping below 0.6 for >30m.\n\n    *Doc 7 (dsid_5e03...):* Synthesis capacity event synthesis. It mentions \"2026-02-10 02:14Z: First elevated p95 token latency detected in prod-eu-1. 2026-02-10 02:21Z: Burst tokens on node pool 3, eviction controller triggered transient preemptions.\" And action items: \"(A1) tenant noise-fence: per-tenant moving-window score to tag and soft-quarantine for up to 15 minutes - owner: Marco Chen - estimate: 5. (A2) Reservation recalc: build script to recompute 95th-percentile sustained per tenant using last 30 days; propose new minimum ramping formula - owner: DataInfra - estimate: 3. (A4) Telemetry gaps: add tenant-level rolling histograms for p50/p95/p99 latency and continuous hit, surface on console per-tenant page - owner: Observability - estimate: 5. (A5) Synthetic: daily synthetic load job that replays sampled tenant traffic patterns to detect potential deficit or burst-policy issues - owner: SRE - estimate: 4. (A6) Runbook update: consolidate catalog and step-by-step actions (soft-quarantine, controlled, rollback criteria) into dedicated runbook; owner: Oncall - estimate: 2. (A7) Canary controls: add deployment gate that simulates high variance traffic through the new burst-debt logic before global rollout - owner: CI/CD - estimate: 3.\" And acceptance_criteria: \"tenant-level histograms areing and visible for 90% of active. Policy: tenant score tags with >80% precision during synthetic test cases. Runbook: oncall can run the catalog end-to-end in <= 25 minutes.\"\n\n    *Doc 8 (dsid_ds...):* Not sure.\n\n    Let's focus on the specific question: \"During the 2025-02-10 capacity incident, what two things should trigger-tenant detection in the runbook update, and how long were SLA targets breached?\"\n\n    The 2025-02-10 incident is mentioned in multiple docs. Let's consolidate the key points about that specific date.\n\n    From Doc 1 (Slack log, likely the same incident or related):\n    - Incident: \"Pager: SLA_BREACH high for tenant=greenridge prod \u00b7 4 p50 token latency breaches in last 5m\"\n    - jess: \"first task: mute the SLA pager for that tenant while we add a dimensionalized alert, and create a temporary panel. does anyone object to a 30m silence?\"\n?\" -> infra-bot mutes for 30m.\n    - ryan (metrics): \"Current check: check.sla_breach.count > 0 for any tenant over 3m window. Pro: change to check.sla_breach.count{tenant} > 0 and require >=3 breaching requests in 5m or p95 latency > 1.2s.\"\n    - So the detection criteria mentioned for the runbook/update update: \">=3 breaching requests in 5m or p95 latency > 1.2s\". Also, maybe the dimensionalization aspect.\n\n    From Doc 2 (linear surge remediation):\n    - \"Impact: several customers experienced >10x tail latency and a small number of requests were retried/; production SLA targets were breached for ~45 minutes.\"\n    - So SLA breached for ~45 minutes.\n\n    From Doc 3 (capacity bridging):\n    - \"Duration: 72 minutes from alert to full remediation on all dedicated customers.\" But this might be a different incident",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 40.26
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "eviction_rate > 0.5% and 99.9 latency increase > 2x over baseline; SLA targets were breached for approximately 45 minutes",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "Candidate answer correctly states both thresholds (eviction_rate > 0.5% and 99.9th-percentile latency > 2x baseline) and the SLA breach duration (approximately 45 minutes), with no contradictions to the gold answer.",
+        "latency_sec": 8.45
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "The two thresholds for noisy-tenant detection from the runbook are: (1) sustained token consumption exceeding 3\u00d7 the tenant's historical median requests-per-second or 95th percentile, sustained over 60 seconds, and (2) KV cache miss rate spiking more than 30% relative to baseline within 60 seconds, paired with per-GPU memory allocation churn exceeding 25 MB/s. However, the specific 2025-02-10 incident and its SLA breach duration are not documented in the available engineering records.",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "Candidate answer provides different detection thresholds and claims the 2025-02-10 incident SLA breach duration is not documented, directly contradicting the Gold Answer.",
+        "latency_sec": 492.73
+      }
+    },
+    {
+      "question_id": "qst_0302",
+      "category": "intra_document_reasoning",
+      "question": "For the 90-day AcmeSec eval, what do they need to send to get Splunk HEC audit log exports wired up, and which internal team members are responsible for wiring the export and sending the pricing quote?",
+      "gold_answer": "To wire up Splunk HEC audit log exports, AcmeSec needs to send their Splunk HEC endpoint and HEC token. Sam (Solutions) is responsible for wiring the HEC export, and Kevin (Sales-Eng) is responsible for sending the pricing quote.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Based on the 90-day AcmeSec evaluation thread (`dsid_85482a6b56e747e29edb35ebec10ab67`), here\u2019s what\u2019s needed and who owns each step:\n\n**To wire Splunk HEC audit log exports:**\n- AcmeSec (`julia`) needs to share the **Splunk HEC endpoint + token** (and optionally an S3 bucket ARN + write credentials if they prefer S3 export).\n- Once those are provided, `sam` (Solutions) will wire the forwarding using the configured snippet (e.g., `type: splunk_hec`, `endpoint`, `token`, `format: json_lines`, `include: [\"auth\",\"admin\",\"audit_config\"]`).\n\n**Internal team responsibilities:**\n- **`sam` (Solutions)** \u2013 Wires the HEC export pipeline and confirms export paths (HEC or S3).\n- **`kevin` (Sales-Eng)** \u2013 Sends the formal POC pricing quote (pro-rata dedicated-pool or hosted export rates) after capacity/token footprint is confirmed.\n- **`maria` (Security)** \u2013 Provides the SOC 2 Type II attestation link, KMS integration docs, sanitized sample export (`acme-sample-audit.jsonl`), audit log schema, and revocation proof documentation.\n- **`julia` (AcmeSec)** \u2013 Supplies the POC roster (names/emails of engineers needing console/API access) and the HEC token/endpoint creds.\n- **`olivia` (AE)** \u2013 Coordinates the 20-min sync (10am PT) to walk through artifacts and marks action items.\n\n**Action summary from the thread:**  \n`olivia (AE): \"Marking action items: sam \u2192 wire HEC; maria \u2192 upload artifacts + SOC2 link; kevin \u2192 quote; julia \u2192 roster + HEC creds. We'll close this thread after the call.\"`",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer's core claims are fully consistent with the Gold Answer. It correctly states that AcmeSec needs to send the Splunk HEC endpoint and HEC token, that Sam (Solutions) wires the export, and that Kevin (Sales-Eng) sends the pricing quote. No contradictions or conflicts exist; additional details provided by the candidate are helpful context and do not penalize the score.",
+        "latency_sec": 100.62
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "To enable Splunk HEC audit log exports for the evaluation, the requesting party should provide the Splunk HEC endpoint URL and the associated authentication token. The internal team responsible for configuring the export pipeline handles the technical wiring once those connection details are received. The pricing quote for hosted or dedicated options is prepared by the sales engineering team after confirming expected usage parameters such as request rate and concurrency.",
+        "correct": true,
+        "completeness": 0.3333,
+        "overall_score": 0.3333,
+        "reasoning": "The candidate answer correctly states that the requesting party should provide the HEC endpoint and token, which aligns with the gold answer. It does not contradict the roles of Sam or Kevin, but only the first gold fact is directly stated or clearly implied; the others are generalized or rephrased beyond strict implication.",
+        "latency_sec": 41.06
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "To wire up Splunk HEC audit log exports for the 90-day AcmeSec evaluation, the AcmeSec lead needs to provide the Splunk HEC endpoint and token to the solutions team; once those are shared, the solutions team configures the forwarding. The internal team members responsible for wiring the export are the **solutions team** (who set up the forwarding after receiving the endpoint/token). For the pricing quote, the **sales engineer** delivers a formal pro\u2011rata quote after confirming the expected concurrency and token footprint; the quote can be based on a hosted setup (lower friction) or a dedicated pool (isolation, ~5 business days provisioning). The broader internal team involved includes the AcmeSec point of contact, account executive, solutions engineer, and security specialist, but the sales engineer is the one who sends the formal pricing documentation.",
+        "correct": true,
+        "completeness": 0.6667,
+        "overall_score": 0.6667,
+        "reasoning": "",
+        "latency_sec": 70.61
+      }
+    },
+    {
+      "question_id": "qst_0451",
+      "category": "miscellaneous",
+      "question": "In the team chat about posting jokes when an AI makes things up in production, what tagging requirement did someone propose for the memes?",
+      "gold_answer": "Ava proposed that any memes posted should be tagged with the model version.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Here's a thinking process:\n\n1.  **Analyze User Input:**\n   - User provides a context block with multiple Slack conversation excerpts from different `doc_id`s.\n   - The question at the end: \"In the team chat about posting jokes when an AI makes things up in production, what tagging requirement did someone propose for the memes?\"\n   - I need to find the relevant part of the conversation that discusses posting jokes when an AI makes things up in production, and specifically a tagging requirement for memes.\n\n2.  **Scan the Context for Keywords:**\n   - Keywords: \"posting jokes\", \"AI makes things up in production\", \"tagging requirement\", \"memes\"\n   - Let me go through each doc mentally or systematically.\n\n   Doc 1 (dsid_a1613730732343a6b7de00c8eba6dd84): About PraisePal, kudos, micro-praise, some discussion about jokes, but not specifically about AI making things up in production and meme tagging.\n\n   Doc 2 (dsid_6cbd3640d21f452ba58e4d0a3492300e): About YAML, semver, coffee, tags, but not about AI jokes/memes tagging.\n\n   Doc 3 (dsid_c2fc417c105e44b78fe5af05524579b8): About \"just-in-case\" items, memes, contact lens cases, etc. No AI production jokes tagging.\n\n   Doc 4 (dsid_4f3983a6188746a199b9c34bd41d0bd5): About potato inference, memes, doge, etc. Has some meme discussion but not about AI making things up in production and tagging requirement.\n\n   Doc 5 (dsid_7b052a65ab6f4e41a4d4c722f9edcfe8): All-hands meeting, not relevant.\n\n   Doc 6 (dsid_12b78798104543fdb6142723f0fa54e5): About prod LLM performance review, HR language, jokes, but not tagging memes for AI mistakes.\n\n   Doc 7 (dsid_9103d13729934051b2fc241ed18b17f0): All-hands, trivia, memes, but not specifically about AI making things up in production and tagging.\n\n   Wait, I need to re-read carefully. The question says: \"In the team chat about posting jokes when an AI makes things up in production, what tagging requirement did someone propose for the memes?\"\n\n   Let me search for \"AI makes things up\" or \"hallucination\" or \"production\" combined with \"meme\" and \"tag\".\n\n   Looking at Doc 1 again: There's discussion about PraisePal, jokes, \"micro-jokes are OK\", but not about AI making things up in production and meme tagging.\n\n   Doc 4: About potato inference, memes, but no tagging requirement for AI mistakes.\n\n   Doc 6: About prod LLM performance review, HR language, but no meme tagging.\n\n   Maybe I missed it. Let me read Doc 1 fully again, especially the part about \"praisepal-bot: note: test run produced one unexpected output: \"Shoutout to @harry for managing to not break the microwave this week \ud83e\udd73 \u2014 we believe in you.\" Please confirm micro-jokes are OK.\" and emma's response. But that's about kudos jokes, not AI making things up in production.\n\n   Doc 4: \"Alex Johnson: ok but imagine we run inference on a potato and it still beats our 2019 laptop\" ... \"Marcus Lee: low-key tempted to replace unit tests with doge memes and call it chaos engineering\" ... \"Alex Johnson: PR title: fix-potato-inference-optimizer.md\" ... No tagging requirement.\n\n   Maybe the question is referring to a specific part I need to identify. Let me think if there's a common theme across these docs about AI hallucinations in production and meme tagging.\n\n   Wait, perhaps the user is referring to a conversation that's not fully captured, or I need to infer from the given text. But the instruction says: \"Answer the question based on the context provided.\" So the answer must be derivable from the given docs.\n\n   Let me re-read all docs carefully for any mention of \"tag\", \"meme\", \"production\", \"AI\", \"hallucination\", \"joke\".\n\n   Doc 1: \n   - \"praisepal-bot: note: test run produced one unexpected output: \"Shoutout to @harry for managing to not break the microwave this week \ud83e\udd73 \u2014 we believe in you.\" Please confirm micro-jokes are OK.\"\n   - \"emma: omg that's peak office humor. approved if it's loving and not passive-aggressive.\"\n   - No tagging requirement for memes in AI production context.\n\n   Doc 4:\n   - \"Alex Johnson: ok but imagine we run inference on a potato and it still beats our 2019 laptop\"\n   - \"Marcus Lee: low-key tempted to replace unit tests with doge memes and call it chaos engineering\"\n   - \"Alex Johnson: PR title: fix-potato-inference-optimizer.md\"\n   - \"DeployBot: CI: tests passed (2/2), lint: warn(s) in memes/*.md\"\n   - Here: \"lint: warn(s) in memes/*.md\" - this is a lint warning for memes files. Could this be the \"tagging requirement\"? It mentions `memes/*.md` lint warnings. But is it about \"posting jokes when an AI makes things up in production\"? Not exactly. It's about potato inference and memes.\n\n   Doc 6:\n   - \"Mira: Quick silly poll: If our prod LLM got a performance review, what would HR say?\"\n   - About prod LLM, but no meme tagging.\n\n   Doc 7:\n   - \"Rita: Live from the all-hands chat // drop your hottest one-liners and GIFs\"\n   - \"ConfettiBot: Automatic confetti in 3...2...1... :confetti_ball: :confetti_ball:\"\n   - No tagging requirement.\n\n   Maybe I need to look for \"tag\" specifically. Let's search for \"tag\" in all docs.\n\n   Doc 1: No \"tag\" related to memes.\n   Doc 2: \"ops-bot: Policy reminder: production tags must follow semver exactly (MAJOR.MINOR.PATCH). Tags like `vX.Y.Z-kinda` will trigger automated rollback.\" - This is about production tags for versions, not memes.\n   Doc 3: No.\n   Doc 4: \"DeployBot: CI: tests passed (2/2), lint: warn(s) in memes/*.md\" - lint warning for memes markdown files. Could be considered a tagging/naming requirement.\n   Doc 5: No.\n   Doc 6: No.\n   Doc 7: No.\n\n   The question: \"In the team chat about posting jokes when an AI makes things up in production, what tagging requirement did someone propose for the memes?\"\n\n   This seems very specific. Maybe it's referring to Doc 4's \"lint: warn(s) in memes/*.md\" as the tagging requirement? But the context doesn't mention \"AI makes things up in production\" in Doc 4. Doc 4 is about potato inference, which is a stretch for \"AI makes things up\".\n\n   Let me re-read Doc 1 carefully. There's a part about \"AI makes things up\"? Not really. It's about PraisePal generating kudos.\n\n   Maybe the user is combining scenarios or there's a missing doc. But I must answer based on given context.\n\n   Let me look for \"hallucination\" or \"makes things up\". None of the docs use that phrase exactly.\n\n   Perhaps the question is a test to see if I can identify that the information isn't present, or I need to infer from closest match.\n\n   Wait, maybe in Doc 6: \"If our prod LLM got a performance review...\" but no meme tagging.\n\n   Let me read Doc 4 again: \"Alex Johnson: ok but imagine we run inference on a potato and it still beats our 2019 laptop\" - this is about running LLM inference on a potato, which is a humorous take on AI performance. \"Marcus Lee: low-key tempted to replace unit tests with doge memes and call it chaos engineering\" - here, memes are mentioned in the context of AI/unit tests. \"DeployBot: CI: tests passed (2/2), lint: warn(s) in memes/*.md\" - this is a lint warning for memes files. Could the \"tagging requirement\" be `memes/*.md` lint? Or maybe someone proposed a tag for memes related to AI outputs?\n\n   Another thought: In Doc 1, there's \"praisepal-bot: note: test run produced one unexpected output: \"Shoutout to @harry for managing to not break the microwave this week \ud83e\udd73 \u2014 we believe in you.\" Please confirm micro-jokes are OK.\" and \"emma: omg that's peak office humor. approved if it's loving and not passive-aggressive.\" But no tagging requirement.\n\n   Maybe the question refers to a different part not included, but I have to work with what's given.\n\n   Let me think if there's any \"tag\" requirement for memes when AI makes things up. Perhaps in Doc 4, the `lint: warn(s) in memes/*.md` is the tagging requirement, as memes are stored as markdown files with a `memes/` directory, and the lint warns about them. But that's a stretch.\n\n   Wait, maybe I missed a doc or the user is referring to a specific interaction. Let me re-read the very first doc's ending: \"infra-bot: deployment note: staging deploy succeeded. production scheduled after ops review. logs: `kudos-gen v0.1 warmstart OK`\" - no.\n\n   Perhaps the answer is simply that no such tagging requirement is mentioned, or it's `memes/*.md` lint warning from Doc 4.\n\n   But the question phrasing: \"what tagging requirement did someone propose for the memes?\" implies there was a proposal.\n\n   Let me search for \"propose\" or \"requirement\" in the docs.\n\n   Doc 1: \"olivia: also maybe add a guardrail for weird privacy things. don't repeat private messages.\" - guardrail, not tagging.\n   \"emma: ops check: infra-bot, can we run PraisePal as a morning digest in #general? one auto-kudos per day?\" - ops check.\n   \"infra-bot: FYI: automated messages to #general require ops review and opt-out toggle per person. Also rate limit = 1/kudos per 24h.\" - rate limit, not meme tagging.\n   \"raj: poll: enable digest? 1) yes 2) no 3) only if we can edit before posting\" - poll.\n   \"emma: 3\" - vote.\n   \"olivia: 1 (I love office cupcakes)\" - vote.\n   \"raj: 3\" - vote.\n   \"praisepal-bot: note: test run produced one unexpected output: \"Shoutout to @harry for managing to not break the microwave this week \ud83e\udd73 \u2014 we believe in you.\" Please confirm micro-jokes are OK.\" - test output.\n   \"emma: omg that's peak office humor. approved if it's loving and not passive-aggressive.\" - approval.\n   \"olivia: final feature request: allow people to submit micro-prompts like \"kudos for helping with Docker\" and get back 3 variations. winners get sticker.\" - feature request.\n   \"infra-bot: deployment note: staging deploy succeeded. production scheduled after ops review. logs: `kudos-gen v0.1 warmstart OK`\" - deployment.\n\n   Doc 4: \"DeployBot: CI: tests passed (2/2), lint: warn(s) in memes/*.md\" - this is the only \"lint\"/warning for memes. Could be the tagging requirement: memes must be in `memes/*.md` and pass lint. But is it about \"posting jokes when an AI makes things up in production\"? The doc is about \"potato inference\", which is a humorous AI inference scenario. Maybe the \"AI makes things up\" refers to the potato running inference, and the memes are jokes about it. The lint warning `memes/*.md` could be the proposed tagging/naming requirement.\n\n   Doc 6: \"DevBot: Note: models cannot accept raises. :robot_face:\" - no.\n\n   Given the exact wording: \"In the team chat about posting jokes when an AI makes things up in production, what tagging requirement did someone propose for the memes?\" - I'm leaning towards the `lint: warn(s) in memes/*.md` from Doc 4, as it's the only mention of a requirement/rules for memes in an AI/inference context. But let me double-check if there's any other.\n\n   Wait, maybe in Doc 1, there's a discussion about \"micro-jokes\" and \"AI makes things up\"? The PraisePal is an LLM that writes kudos/jokes. The \"unexpected output\" was a joke about not breaking the microwave. Emma says \"approved if it's loving and not passive-aggressive.\" But no tagging requirement.\n\n   Perhaps the question is from a specific part of the conversation that I'm supposed to know, but based solely on the text, the closest is Doc 4's `lint: warn(s) in memes/*.md`.\n\n   However, the question might be trick: maybe no such requirement",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 69.48
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "The proposed tagging requirement was that memes should include the model version tag.",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 20.81
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "The proposed tagging requirement is to tag memes with the model version.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer correctly restates the tagging requirement and is factually consistent with the gold answer, with no contradictions.",
+        "latency_sec": 75.41
+      }
+    },
+    {
+      "question_id": "qst_0452",
+      "category": "miscellaneous",
+      "question": "Who owns the messy go-to-market misc assets dump with placeholder marketing files and micro-copy ideas created during a last-minute scramble before a partner call?",
+      "gold_answer": "Priya Nair (go-to-market) owns the messy GTM misc assets dump.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Priya Nair",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer correctly identifies Priya Nair as the owner, which is factually consistent with the Gold Answer and Gold Facts. No claims contradict the reference, and the core ownership claim is accurately supported.",
+        "latency_sec": 18.32
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "Priya Nair",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 20.72
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "The go-to-market miscellaneous assets dump is owned by **Priya Nair**, who is identified as the owner of the GTM misc assets batch. Alex Kim has made recent updates to the collection, and other team members have specific responsibilities for cleanup, legal review, and standardization (e.g., Samira Ortiz for legal co-marketing constraints, Sofia for badge export consolidation, Maya and Tony for asset standardization, Ethan for legal approvals of customer logos).",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 60.32
+      }
+    },
+    {
+      "question_id": "qst_0341",
+      "category": "project_related",
+      "question": "For the Proxima Bank 429 spike after priority routing rollout, what caused the throttling and what temporary policy exception did we apply, and how do we verify it is not burning the enterprise route SLOs?",
+      "gold_answer": "Throttling was triggered by hot-route protection admission control in us-east: Proxima's bursty combined chat+embeddings traffic exceeded the conservative enterprise route-group burst/budget during a regional pressure window (elevated queue depth/scheduler lag), so requests were denied as \"overload_protection_admission/admission_over_budget\" with Retry-After 1-2s (not primarily quota). We applied a temporary, region-scoped policy override for PROXIMA-ENT-014: increased the burst multiplier/budget for chat+embeddings in us-east only, time-boxed for 14 days with guardrails/auto-rollback. To verify it's not burning enterprise route SLOs, watch the enterprise (Protected) route x region dashboards for chat/completions and embeddings: error-budget burn/availability and p95/p99 latency stay within SLO targets, 5xx stays below burn thresholds, and enterprise overload/admission-control 429s (which count against enterprise availability) plus enterprise shed_rate remain near zero (alert-level if sustained).",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "**What caused the throttling**\n\nThe spike in 429s was driven by Redwood\u2019s \"hot-route capacity protection\" rollout, which activated **tier-aware admission control** for enterprise-protected routes (`/v1/chat/completions` + `/v1/embeddings`) in `us-east` (and later `eu-west`). Proxima Bank\u2019s contractual traffic profile\u2014bursty ~800\u20131,200 RPS chat spikes and ~2,000\u20133,000 RPS embedding bursts, often concurrent\u2014exceeded the conservative default burst multipliers and per-route/per-tier admission budgets. The system shed/admitted based on shared-pool pressure signals: best-effort traffic was clipped first, but enterprise admission control still gated Proxima\u2019s bursts when the combined route budget was exceeded during regional pressure windows. Most 429s carried the reason code `overload_protection_admission` (not `quota_exceeded`), and the enterprise SLO for latency remained intact, but Proxima\u2019s burst profile was being clipped more aggressively than intended for their traffic shape. Scheduler lag and long-context prompts further increased queue depth for admitted enterprise requests, contributing to tail-latency degradation even when requests were not shed.\n\n**Temporary policy exception applied**\n\nA **time-boxed, region-scoped burst exception** was granted for `PROXIMA-ENT-014` with the following guardrails:\n\n| Scope | Details |\n|---|---|\n| **us-east** | 14-day expiry; burst multiplier increase + scheduled window **09:25\u201309:50 ET weekdays**; 400 RPS combined ceiling for `/v1/chat/completions` + `/v1/embeddings`; automatic rollback if shed rate >2% sustained >5 min **or** enterprise p99 latency burn exceeds threshold. |\n| **eu-west** | Burst multiplier raised from **2.0\u00d7 \u2192 3.0\u00d7** for `/v1/chat/completions`, tenant + route-group + region scoped; auto-expires **2026-02-02 07:00 UTC**; no sustained-rate increase. |\n| **Customer mandates** | Implement exponential backoff + jitter; honor `Retry-After`; cap concurrent streams; avoid immediate retries; deploy client-side changes within 7 days. |\n| **Monitoring** | Audit-log tag `temporary_exception=true`; incident-bot notice rule; weekly metrics readout after first two market opens; rollback triggers tied to enterprise SLO burn or sustained elevated shed rates. |\n\n**How verification confirmed SLOs were not burned**\n\n- **429 rates dropped** from 6\u201312% (pre-exception) to **~0.8\u20132%** during burst windows after the exception took effect.\n- **Enterprise SLO dashboards** (p95/p99 latency, 5xx rates) showed **no negative impact**; p99 latency remained within SLO, and fleet health protections continued working as designed.\n- **Reason-code mix shifted** from `overload_protection_admission` toward `quota_exceeded` (expected, as burst headroom increased), with no corresponding spike in 5xx or timeout cascades.\n- **No detectable degradation** for other enterprise tenants on shared route groups; p95 remained stable across the route-group.\n- **Post-rollback reviews** (after day 10\u20131",
+        "correct": true,
+        "completeness": 0.6,
+        "overall_score": 0.6,
+        "reasoning": "",
+        "latency_sec": 54.14
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "The throttling was caused by the new enterprise priority routing and capacity protection system implementing per-route/per-tier admission control, which gated Proxima Bank's bursty workloads (10\u201330s market-open spikes at 800\u20131200 RPS chat + ~2k RPS embeddings) more aggressively than intended for their contractual traffic shape. The 429 responses primarily carried the reason code \"overload_protection_admission,\" indicating the system was shedding load during regional pressure events to preserve fleet health, rather than quota exhaustion.\n\nA time-boxed, region-scoped burst exception was applied for PROXIMA-ENT-014 on chat+embeddings in us-east only, with a 14-day expiry and automatic rollback guardrails triggered if enterprise p99 latency burn exceeded thresholds or shed rate sustained above 2%. This was additionally scoped to weekdays 09:25\u201309:50 ET with a 400 RPS combined ceiling, verified via internal debug endpoints showing increased burst budget for Proxima, and confirmed to have no negative impact on enterprise SLO dashboards post-implementation.\n\nVerification that the exception was not burning enterprise route SLOs relied on monitoring shed rates and p95 latency for the tenant during the window, with post-change reviews showing Proxima-specific 429s reduced and the reason mix shifting mostly to quota_exceeded at end-of-day usage peaks (expected behavior). The system also maintained enterprise p99 latency within SLO during the event, indicating protections were working for fleet health while the customer's burst profile received appropriate guardrails.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 40.53
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "Following the enterprise priority routing rollout, Proxima Bank saw a spike in HTTP 429 responses, primarily in the `us-east` region affecting `/v1/chat/completions` and `/v1/embeddings` routes. The most common Redwood reason code was `overload_protection_admission`, indicating transient overload, while `quota_exceeded` occurred less frequently and was tied to the daily quota window nearing capacity. Under the enterprise tier's protected route semantics, throttling and shedding are designed to preserve budget for enterprise accounts during regional or fleet pressure\u2014best-effort traffic is shed before enterprise admission control engages, and only transient overload (`over_capacity`) counts against the enterprise availability SLO (target 99.9% successful requests per route group per region, rolling 28 days); contractual caps like `quota_exceeded` do not.\n\n**Temporary policy exception applied:** A time-boxed, region-scoped burst exception (`PROXIMA-ENT-014`) was granted for the chat and embeddings routes in `us-east`. Key details:\n- **Expiry:** 14 days with automated rollback guardrails.\n- **Guardrails:** Automatic rollback if enterprise p99 latency burn exceeded thresholds or sustained shed rates rose above 2%.\n- **Customer requirements:** Implement exponential backoff with jitter, honor `Retry-After` headers, and cap concurrency within a 7-day window.\n- **Monitoring & annotations:** Incident annotations were added, and the exception was configured to auto-rollback if guardrails were violated.\n\n**Verification that SLOs weren't being burned:** After the exception was applied:\n- 429 rates decreased to approximately **0.8%** during smaller spikes.\n- The reason mix shifted toward `quota_exceeded` at end-of-day usage peaks, which is expected behavior (contractual caps, not counted against the SLO).\n- The automated rollback guardrails remained active: if p99 latency burn or sustained shed rates exceeded the 2% threshold, the exception would have been rolled back automatically.\n- The enterprise availability SLO target (99.9% successful requests per route group per region, rolling 28 days) was monitored throughout; the shift to `quota_exceeded` indicated the system was operating within contractual limits rather than transient overload.\n- The customer also deployed client-side retry improvements as a complementary measure.\n\nIn summary, the throttling was caused by enterprise admission control engaging to preserve budget after the rollout. The temporary burst exception (`PROXIMA-ENT-014`) increased burst budgets with strict guardrails and customer obligations. Verification relied on reduced 429 rates, a shift from overload\u2011type to quota\u2011type reason codes, and automatic rollback mechanisms that would have triggered if the enterprise availability SLO or latency burn thresholds were at risk.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 71.77
+      }
+    },
+    {
+      "question_id": "qst_0342",
+      "category": "project_related",
+      "question": "Our Key Management Standard says we must not cache plaintext DEKs, but ADR-007 allows a short-lived in-memory DEK cache. What is the actual policy we should follow, and how should we describe DEK caching and KMS outage behavior in customer-facing rotation materials?",
+      "gold_answer": "Follow the Key Management Standard's intent: never persist or long-term cache plaintext DEKs. The only permitted \"cache\" is the ADR-007 constrained optimization: short-lived, in-process-only reuse of plaintext DEKs that are already in memory for request handling (bounded TTL/size, no disk/DB/distributed cache, disable-able in regulated environments). In customer-facing rotation/outage materials, describe it as: Redwood uses envelope encryption; DEKs are wrapped by the customer's KEK in KMS/HSM; Redwood may retain short-lived in-memory cryptographic material for active workloads but does not rely on indefinite caching of KMS responses. If KMS is unavailable/degraded, operations that require wrap/unwrap may fail fast with explicit errors; Redwood uses timeouts, bounded retries with backoff/jitter, circuit breaker/backpressure to prevent retry storms. Do not promise continued decrypt during a KMS outage or disclose exact timeout/retry/breaker thresholds. During rotation, mention dual-decrypt/rollback, and that we do not fan out across keys on timeout/throttling-only bounded fallback for key-mismatch/InvalidCiphertext-type cases.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "### Policy Reconciliation: Key Management Standard vs. ADR-007\n\nThe apparent conflict is resolved by understanding the **hierarchy** and **scope** of each document:\n\n| Document | Stance on Plaintext DEK Caching |\n|----------|----------------------------------|\n| **Key Management Standard** (`dsid_377cdf4e`) | **\"MUST NOT cache plaintext DEKs.\"** This is a baseline security control applied across all deployments (Hosted/Dedicated/Private). It prohibits persistent, distributed, or long-lived storage of decrypted key material. |\n| **ADR-007** (`dsid_d64b62cc`) | **\"Allows a short-lived, in-memory DEK cache**",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 42.68
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "Error: Request timed out.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 484.69
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "Thank you for raising this important policy clarification. Based on the internal documentation, here is the actual policy and guidance for customer-facing materials:\n\n## Actual Policy: Plaintext DEK Caching\n\nThe **plaintext DEK cache policy** is the binding policy that takes precedence. It enforces the following constraints:\n\n- **In-memory only**: DEKs may be cached only in memory, never persisted to disk, databases, or distributed caches.\n- **TTL control**: Default TTL is 5 minutes, configurable downwards but caches longer than 15 minutes require a security exception.\n- **Entry bounds**: Maximum entries are bounded (default 10,000) via LRU eviction.\n- **Key format**: Cache keys must use hashed stable identifiers\u2014raw customer data must be excluded.\n- **Disability**: The cache must be disable-able via configuration, especially in regulated environments.\n- **Security purpose**: This design balances latency reduction with security by limiting the blast radius of a key compromise; rotation and invalidation are handled by bumping key versions.\n\n**ADR-007** (\"Short-lived in-memory DEK cache\") is the architectural decision record that justifies why such a cache exists at all\u2014it enables efficient serving of active workloads within a process lifetime without relying on indefinite KMS calls. However, ADR-007 does not override the plaintext DEK cache policy; it operates *within* its constraints.\n\n## Describing DEK Caching and KMS Outage Behavior in Customer-Facing Rotation Materials\n\nWhen communicating externally, keep the language high-level and avoid disclosing sensitive operational details. Recommended framing:\n\n### DEK Caching\n- \"Redwood uses short-lived, in-memory caching of data encryption keys (DEKs) to reduce latency for active workloads. Caches are bounded in size, have configurable time-to-live (default 5 minutes), and are stored only in memory\u2014never persisted to disk or external stores. The cache can be disabled via configuration for regulated deployments.\"\n\n### KMS Outage / Degradation Behavior\n- \"The key management service (KMS) is treated as a critical dependency. If the KMS becomes unavailable or error rates exceed thresholds, Redwood fails fast and returns explicit errors to callers rather than proceeding with uncertain correctness. Operational guardrails\u2014including timeouts, bounded retries with backoff/jitter, and circuit breaker behavior\u2014are in place to prevent retry amplification and cascading failures during KMS incidents.\"\n- \"During a KMS outage, decryption of previously encrypted data is not guaranteed. Customers should ensure their key rotation and cutover procedures account for this dependency. Rotation is designed to be reversible within the cutover window, and audit/checklist evidence is maintained for compliance documentation.\"\n\n### What to Omit Externally\n- Exact timeout values, retry counts, or circuit breaker thresholds by environment.\n- Any implication that decryption is always possible during a KMS outage.\n- Low-level details of the shared wrapper library\u2019s implementation.\n\n### Key Takeaway for Customers\nThe binding requirement is the **plaintext DEK cache policy** (in-memory only, TTL\u2011bounded, disable\u2011able). ADR-007\u2019s short-lived cache is an internal optimization that respects those constraints. KMS outage behavior is characterized by fast failure and explicit errors, with guardrails to protect against cascading impacts\u2014never assume decryption availability during an outage.\n\nIf you need the exact wording for a specific customer-facing document or have further questions about the rotation procedure\u2019s dual\u2011read/cutover/rollback steps, let me know and I can pull the relevant ADR or rotation packet details.",
+        "correct": true,
+        "completeness": 0.7,
+        "overall_score": 0.7,
+        "reasoning": "",
+        "latency_sec": 124.12
+      }
+    },
+    {
+      "question_id": "qst_0176",
+      "category": "semantic",
+      "question": "When does booking open for the new top end 80GB accelerator on dedicated clusters in the EU Central and India South locations?",
+      "gold_answer": "Reservations for the new NVIDIA H200 80GB (h200-80) dedicated capacity in eu-central-1 and ap-south-1 open on Monday, 2026-04-06 at 09:00 UTC.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "Based on the internal Slack announcements, booking (reservation) opens for the NVIDIA H200 80GB dedicated GPU SKU in **EU Central (`eu-central-1`)** and **India South (`ap-south-1`)** on:\n\n**Monday, April 6, 2026 at 09:00 UTC**\n\nThis is the initial opening date cited in the first announcement thread. Subsequent internal posts adjusted the window to April 7 and April 8 at the same time, but the official rollout kickoff is April 6.\n\nKey details from the announcements:\n- **SKU**: NVIDIA H200 80GB (`h200-80`)\n- **Soft quota**: 48\u201364 GPUs per organization across both regions for the first 30 days (varies slightly by post)\n- **Pricing**: 1.25\u00d7 H100 list price; reserved commit discounts apply\n- **Regional note**: `ap-south-1` launches with NVLink disabled due to vendor constraints, affecting multi-GPU sharded workloads\n- **Runbook**: `https://internal.redwood/ops/runbooks/dedicated-h200` must be read before approving customer requests\n- **CLI example**: `rw capacity reserve --region eu-central-1 --sku h200-80 --count 4 --start 2026-04-06T09:00Z --end 2026-10-06T09:00Z --purpose migration-demo`\n\nIf you're coordinating reservations, it's recommended to reference the most recent runbook and check the internal quota dashboard, as soft caps and approval queues are enforced per organization.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer correctly states that booking opens on Monday, April 6, 2026 at 09:00 UTC for the H200 80GB dedicated GPU SKU in EU Central (eu-central-1) and India South (ap-south-1), which is fully consistent with the Gold Answer. All three Gold Facts are directly stated or clearly implied by the candidate answer.",
+        "latency_sec": 35.89
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "Based on the context information, booking opens for the NVIDIA H200 80GB dedicated capacity in eu-central-1 and ap-south-1 on Monday, April 6, 2026 at 09:00 UTC. This was announced in the platform channel with the specific reservation opening time and supporting details including the allocation window from April 6-8, 2026.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "The candidate answer accurately reports the booking opening date (Monday, April 6, 2026 at 09:00 UTC) and locations (eu-central-1 and ap-south-1), which are consistent with the gold answer. The additional detail about the allocation window from April 6-8 is extra context and does not contradict the gold answer.",
+        "latency_sec": 35.65
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "Booking for the new 80GB accelerator (NVIDIA H200) on dedicated clusters opens on **April 6, 2026** for EU Central locations and **April 8, 2026** for India South (ap-South-1) locations. Additionally, organizational soft quotas of 64 GPUs and 56 GPUs respectively apply across both regions for the initial period.",
+        "correct": false,
+        "completeness": 0.6667,
+        "overall_score": 0.0,
+        "reasoning": "The candidate states booking opens on April 8, 2026 for India South, conflicting with the Gold Answer which specifies April 6, 2026 for both EU Central and India South. While the candidate correctly mentions booking opens for both locations, the date error for India South makes the answer factually inconsistent with the Gold Answer.",
+        "latency_sec": 161.33
+      }
+    },
+    {
+      "question_id": "qst_0177",
+      "category": "semantic",
+      "question": "What were the final concession terms approved for the retail partner purchase through the major cloud providers marketplace, specifically the first year price reduction and the referral payout schedule after launch?",
+      "gold_answer": "The final approved concession was a 30% discount off list price for the first 12 months. The referral/partner payout was set at 15% rev-share for the first two quarters after go-live, stepping down to 8% thereafter unless renewed via executive review.",
+      "hybrid_qe": {
+        "pipeline": "Hybrid QE",
+        "answer": "# Final Concession Terms for Retail Partner AWS Marketplace Private Offer\n\nBased on the documented approval sequence between Redwood Inference and NovaRetail (a retail technology partner), the final approved commercial terms are:\n\n## First-Year Price Reduction\n- **30% off list price for the first 12 months** (reduced from NovaRetail's initial 35% request)\n- Committed to a 12-month term (not the originally requested 24 months)\n- Based on finalized SKU mix with estimated first-year spend of $360k\n\n## Referral Payout Schedule After Launch\n- **15% revenue-share payment to NovaRetail for the first two quarters post-go-live**\n- **Steps down to 8% thereafter** unless renewed by executive review\n- Requires NovaRetail to provide monthly revenue reports and usage telemetry for the first 6 months\n- Subject to two go/no-go milestones at 30 and 90 days tied to usage thresholds\n- If milestones are not met, Redwood reserves the right to reprice or terminate without penalty\n\nThese terms were finalized after a multi-stakeholder approval process involving deal desk, legal, finance, and executive leadership, with Jonas Weber (VP, Revenue Operations & GTM Partnerships) providing final approval on October 6, 2026. The terms balance NovaRetail's strategic channel value with Redwood's margin protection requirements.",
+        "correct": true,
+        "completeness": 1.0,
+        "overall_score": 1.0,
+        "reasoning": "All three gold facts are directly stated or clearly implied in the candidate answer. The 30% first-12-month discount, 15% first-two-quarters referral payout, and 8% thereafter step-down are explicitly present. No claims contradict the gold answer, and numeric quantities agree.",
+        "latency_sec": 43.17
+      },
+      "pure_qe": {
+        "pipeline": "Pure QE",
+        "answer": "Based on the provided context, the final concession terms approved for the retail partner purchase through the major cloud providers marketplace were as follows:\n\nFor the StellarRetail pilot program (a retail company), the deal desk approved:\n- A 30% blended credit applied to the first-year equivalent of the committed pilot spend, capped at $50,000 total\n- Waiver of the one-time listing fee for 90 days from listing activation (applicable to both AWS and Azure marketplaces)\n- A 6-month pilot term limited to the North America region\n- Required conditions: signed purchase order plus a Docuigned private offer and statement of work, with a clawback clause applying if the purchase order is canceled within 30 days\n\nThe pilot was structured around an estimated $120,000 in committed spend across both cloud providers over the 6-month period.\n\nHowever, the provided context does not contain information regarding a \"referral payout schedule after launch.\" The documents describe a time-limited pilot program with specific concession terms, but do not outline ongoing referral payout structures or schedules that would apply after the pilot period concludes.",
+        "correct": true,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "",
+        "latency_sec": 342.3
+      },
+      "pure_agent": {
+        "pipeline": "Pure Agent",
+        "answer": "Based on the approved retail partner purchase concession terms for cloud marketplace arrangements, here are the key elements you requested:\n\n**First-year price reduction structures:**\n- **20% off-invoice discount for year-one** (Cloudlytics renewal, approved with 12-month commitment and 6-month prepayment)\n- **Front-loaded discount schedule**: 18% in year-one, 8% in year-two, 5% in year-three (Stellaris, with option A recommended)\n- **Promotional SKU mapping** to preserve existing effective pricing for the first 12 months (Merchantly conversion to marketplace billing)\n- **Tiered discount structure**: 15% baseline, 23% committed tier (250k-1M spend), 28% enterprise tier (1M+ spend) (ACME/Corporate pricing)\n\n**Referral payout/partner commission schedules after launch:**\n- **20% reseller pass-through cap on managed services line items**, with separate settlement schedule not visible on customer invoices (Stellaris waterfall structure)\n- **Revenue-share carveout capped at $60,000 for first 6 months**, representing 15% of marketplace revenue (CloudBright pilot approval)\n- **17% pass-through to reseller on managed services** separate from core platform billing (CloudResell/ACME arrangement)\n- **Partner payout conditions tied to performance milestones**, such as >$250k ARR commitment within 6 months to remove caps\n\n**Additional approval conditions:**\n- Finance sign-off on DSO impact and revenue recognition amortization schedules\n- Legal review of carve-out language preserving indemnity for model outputs\n- Executive approval for exceptions to standard terms (commission caps, billing term extensions)\n- Required clauses: 7-business-day reconciliation windows, usage export formats, tax segregation requirements, and amortization of one-time credits over contract periods\n\nThese terms represent typical approved structures across major cloud provider marketplaces, with variations based on partner segment, committed spend levels, and specific marketplace requirements (AWS, GCP, Azure).",
+        "correct": false,
+        "completeness": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "The candidate answer provides different discount percentages (20% off-invoice, 18% year-one, tiered 15%/23%/28% structures) and referral payout structures (15% rev-share capped at $60,000 for first 6 months in CloudBright pilot, 20%/17% reseller pass-through caps) that directly conflict with the Gold Answer's specific terms of 30% discount for first 12 months and 15% rev-share stepping down to 8% after two quarters unless renewed via executive review. None of the three Gold Facts are directly stated or clearly implied by the candidate answer under strict judgment, as the candidate presents alternative structures and numeric quantities that disagree with the Gold Answer.",
+        "latency_sec": 119.29
+      }
+    }
+  ]
+}
